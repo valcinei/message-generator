@@ -135,6 +135,10 @@
     /* Code elements */
     code{background:var(--input-bg); color:var(--accent); padding:2px 4px; border-radius:4px; font-size:0.9em;}
     
+    /* Máscara de telefone */
+    .phone-input{font-family:ui-monospace,'SF Mono',Monaco,'Cascadia Code','Roboto Mono',Consolas,'Liberation Mono','Menlo',monospace; letter-spacing:0.5px;}
+    .phone-input::placeholder{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial; letter-spacing:normal;}
+    
     /* Responsividade adicional */
     @media(max-width:768px){
       .container-fluid{padding:16px 12px}
@@ -662,6 +666,12 @@
       }
 
       atualizarVariaveisDisponiveis();
+      
+      // Aplicar máscaras após carregar dados
+      setTimeout(() => {
+        aplicarMascarasEmTodosOsTelefones();
+      }, 100);
+      
       if (nome) mostrarAlerta('Sucesso', `Configuração "${nome}" carregada com sucesso!`, 'success');
     }
 
@@ -921,6 +931,7 @@
           <div class="d-flex align-items-center gap-1">
             <span>${variavel.label}</span>
             ${variavel.obrigatorio ? '<i class="bi bi-asterisk text-danger small"></i>' : ''}
+            ${(variavel.nome === 'telefone' || variavel.nome === 'whatsapp' || variavel.nome === 'celular' || variavel.nome === 'phone' || variavel.nome.includes('tel') || variavel.nome.includes('fone')) ? '<i class="bi bi-telephone text-info small ms-1" title="Campo com máscara de telefone"></i>' : ''}
           </div>
         `;
         header.appendChild(th);
@@ -934,6 +945,11 @@
 
       // Limpar linhas existentes
       els('#tbl tbody tr').forEach(tr => tr.remove());
+      
+      // Aplicar máscaras após renderizar
+      setTimeout(() => {
+        aplicarMascarasEmTodosOsTelefones();
+      }, 100);
     }
 
     function addRow(dados = {}) {
@@ -941,7 +957,7 @@
       const tr = document.createElement('tr');
 
       // Campos das variáveis
-      state.variaveis.forEach(variavel => {
+      state.variaveis.forEach((variavel, index) => {
         const td = document.createElement('td');
         td.setAttribute('data-label', variavel.label);
         
@@ -954,6 +970,18 @@
           clearTimeout(window.autoSaveTimeout);
           window.autoSaveTimeout = setTimeout(salvarDados, 1000);
         });
+        
+        // Aplicar máscara se for campo de telefone
+        const isTelefone = variavel.nome === 'telefone' || 
+                          variavel.nome === 'whatsapp' || 
+                          variavel.nome === 'celular' || 
+                          variavel.nome === 'phone' ||
+                          variavel.nome.includes('tel') ||
+                          variavel.nome.includes('fone');
+        
+        if (isTelefone) {
+          configurarMascaraTelefone(input);
+        }
         
         td.appendChild(input);
         tr.appendChild(td);
@@ -990,7 +1018,22 @@
           const inputs = els('input', tr);
           const dadosDuplicados = {};
           inputs.forEach((input, index) => {
-            dadosDuplicados[state.variaveis[index].nome] = input.value;
+            // Para campos de telefone, obter valor sem máscara para duplicação
+            let valor = input.value;
+            const variavel = state.variaveis[index];
+            const isTelefone = variavel.nome === 'telefone' || 
+                              variavel.nome === 'whatsapp' || 
+                              variavel.nome === 'celular' || 
+                              variavel.nome === 'phone' ||
+                              variavel.nome.includes('tel') ||
+                              variavel.nome.includes('fone');
+            
+            if (isTelefone) {
+              // Manter a formatação visual para o usuário
+              valor = input.value;
+            }
+            
+            dadosDuplicados[variavel.nome] = valor;
           });
           addRow(dadosDuplicados);
           salvarDados();
@@ -1009,8 +1052,27 @@
 
         inputs.forEach((input, index) => {
           const variavel = state.variaveis[index];
-          registro[variavel.nome] = input.value.trim();
-          if (input.value.trim()) temDados = true;
+          let valor = input.value.trim();
+          
+          // Para campos de telefone, remover formatação para armazenamento
+          const isTelefone = variavel.nome === 'telefone' || 
+                            variavel.nome === 'whatsapp' || 
+                            variavel.nome === 'celular' || 
+                            variavel.nome === 'phone' ||
+                            variavel.nome.includes('tel') ||
+                            variavel.nome.includes('fone');
+          
+          if (isTelefone && valor) {
+            // Manter apenas os dígitos para armazenamento, mas preservar formatação visual
+            const apenasDigitos = valor.replace(/\D/g, '');
+            // Se o número parece ser brasileiro, armazenar com formatação legível
+            if (apenasDigitos.length >= 10) {
+              valor = input.value; // Manter formatação visual
+            }
+          }
+          
+          registro[variavel.nome] = valor;
+          if (valor) temDados = true;
         });
 
         if (temDados) registros.push(registro);
@@ -1027,6 +1089,114 @@
       if (digits.startsWith('55')) return digits;
       if (digits.length >= 10 && digits.length <= 11) return '55' + digits;
       return digits;
+    }
+
+    // ===== Máscaras de Telefone =====
+    function aplicarMascaraTelefone(input) {
+      const valor = input.value.replace(/\D/g, '');
+      let masked = '';
+      
+      if (valor.length === 0) {
+        masked = '';
+      } else if (valor.length <= 2) {
+        // Apenas DDD: (11
+        masked = `(${valor}`;
+      } else if (valor.length <= 3) {
+        // DDD + primeiro dígito: (11) 9
+        masked = `(${valor.slice(0, 2)}) ${valor.slice(2)}`;
+      } else if (valor.length <= 7) {
+        // DDD + primeiros dígitos: (11) 9 9999
+        masked = `(${valor.slice(0, 2)}) ${valor.slice(2, 3)} ${valor.slice(3)}`;
+      } else if (valor.length <= 11) {
+        // Celular completo: (11) 9 9999-9999
+        masked = `(${valor.slice(0, 2)}) ${valor.slice(2, 3)} ${valor.slice(3, 7)}-${valor.slice(7)}`;
+      } else {
+        // Telefone internacional: +55 (11) 9 9999-9999
+        if (valor.startsWith('55') && valor.length <= 13) {
+          const ddd = valor.slice(2, 4);
+          const nono = valor.slice(4, 5);
+          const primeira = valor.slice(5, 9);
+          const segunda = valor.slice(9, 13);
+          masked = `+55 (${ddd}) ${nono} ${primeira}${segunda ? '-' + segunda : ''}`;
+        } else {
+          // Fallback para números muito longos
+          masked = `+${valor.slice(0, 2)} (${valor.slice(2, 4)}) ${valor.slice(4, 5)} ${valor.slice(5, 9)}-${valor.slice(9, 13)}`;
+        }
+      }
+      
+      input.value = masked;
+    }
+
+    function configurarMascaraTelefone(input) {
+      // Adicionar classe para estilização
+      input.classList.add('phone-input');
+      
+      // Atualizar placeholder
+      if (input.placeholder.toLowerCase().includes('telefone') || 
+          input.placeholder.toLowerCase().includes('whatsapp') ||
+          input.placeholder.toLowerCase().includes('celular') ||
+          input.placeholder.toLowerCase().includes('phone')) {
+        input.placeholder = 'Ex: (11) 9 9999-9999';
+      }
+      
+      // Event listeners
+      input.addEventListener('input', (e) => {
+        const cursorPos = e.target.selectionStart;
+        const oldLength = e.target.value.length;
+        
+        aplicarMascaraTelefone(e.target);
+        
+        // Ajustar posição do cursor após aplicar máscara
+        const newLength = e.target.value.length;
+        const diff = newLength - oldLength;
+        
+        // Manter cursor na posição adequada
+        let newPos = cursorPos + diff;
+        if (newPos < 0) newPos = 0;
+        if (newPos > newLength) newPos = newLength;
+        
+        // Evitar cursor em posições de formatação
+        const formatChars = ['(', ')', ' ', '-', '+'];
+        if (formatChars.includes(e.target.value[newPos - 1]) && diff > 0) {
+          newPos++;
+        }
+        
+        setTimeout(() => {
+          e.target.setSelectionRange(newPos, newPos);
+        }, 0);
+        
+        // Trigger auto-save se existir
+        if (window.autoSaveTimeout) {
+          clearTimeout(window.autoSaveTimeout);
+          window.autoSaveTimeout = setTimeout(salvarDados, 1000);
+        }
+      });
+      
+      // Aplicar máscara no valor inicial se existir
+      if (input.value) {
+        aplicarMascaraTelefone(input);
+      }
+    }
+
+    function aplicarMascarasEmTodosOsTelefones() {
+      // Aplicar em inputs existentes na tabela
+      const phoneInputs = els('#tbl input').filter(input => {
+        const variavel = state.variaveis.find((v, index) => {
+          const cell = input.closest('td');
+          const cellIndex = Array.from(cell.parentNode.children).indexOf(cell);
+          return cellIndex === index && (
+            v.nome === 'telefone' || 
+            v.nome === 'whatsapp' || 
+            v.nome === 'celular' || 
+            v.nome === 'phone' ||
+            v.nome.includes('tel') ||
+            v.nome.includes('fone')
+          );
+        });
+        return variavel;
+      });
+      
+      phoneInputs.forEach(configurarMascaraTelefone);
     }
 
     function formatBRL(v) {
@@ -1670,6 +1840,11 @@ Entre em contato pelo WhatsApp para mais detalhes.`;
         setDefaultTemplate();
         addRow({});
       }
+      
+      // Aplicar máscaras de telefone após tudo carregar
+      setTimeout(() => {
+        aplicarMascarasEmTodosOsTelefones();
+      }, 200);
     }
 
     // Inicializar quando página carregar
