@@ -55,6 +55,8 @@
       /* Cores específicas para melhor contraste */
       --text-primary:#f8fafc; --text-secondary:#cbd5e1; --text-muted:#94a3b8;
       --success:#10b981; --warning:#f59e0b; --info:#3b82f6;
+      /* Variáveis adicionais para autocomplete */
+      --bg-secondary:#1e293b;
     }
     
     [data-theme="light"] {
@@ -63,6 +65,8 @@
       /* Cores específicas para tema claro */
       --text-primary:#1f2937; --text-secondary:#374151; --text-muted:#6b7280;
       --success:#059669; --warning:#d97706; --info:#2563eb;
+      /* Variáveis adicionais para autocomplete */
+      --bg-secondary:#f1f5f9;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial; background:var(--bg); color:var(--text-primary); transition: all 0.3s ease;}
@@ -326,12 +330,16 @@
 
     /* Custom autocomplete menu customization */
     .custom-autocomplete-menu { 
-      background: var(--bg-secondary); 
+      background: var(--panel); 
       color: var(--text-primary); 
       border: 2px solid var(--accent);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
     }
     .autocomplete-item { 
       padding: 16px 20px; 
@@ -343,6 +351,9 @@
       justify-content: center;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
     }
     .autocomplete-item:last-of-type {
       border-bottom: none;
@@ -370,10 +381,66 @@
         max-width: 95vw !important;
         max-height: min(300px, 50vh) !important;
         font-size: 16px; /* Evita zoom no iOS */
+        position: absolute !important;
+        z-index: 9999 !important;
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
       }
       .autocomplete-item {
         padding: 18px 22px !important;
         min-height: 70px !important;
+        -webkit-tap-highlight-color: transparent !important;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      
+      /* Prevenir zoom e scroll indesejado no mobile */
+      body.autocomplete-active {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+      }
+      
+      /* Template highlighting responsivo */
+      .template-input-container textarea,
+      .template-highlight-backdrop {
+        font-size: 16px; /* Evita zoom no iOS */
+        line-height: 1.5;
+      }
+      
+      /* Melhorar responsividade da seção de registros */
+      .btn-group {
+        width: 100%;
+      }
+      
+      .btn-group .btn {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      /* Tabela mais compacta em mobile */
+      .table-responsive .table {
+        font-size: 14px;
+      }
+      
+      .table-responsive .table th,
+      .table-responsive .table td {
+        padding: 8px 6px;
+        vertical-align: middle;
+      }
+      
+      /* Botões mais acessíveis em mobile */
+      .btn {
+        min-height: 44px;
+        font-size: 14px;
+      }
+      
+      /* Input de telefone em mobile */
+      input[type="tel"] {
+        font-size: 16px !important;
       }
     }
   </style>
@@ -1199,12 +1266,12 @@
         autocompleteContainer.className = 'custom-autocomplete-menu';
         autocompleteContainer.style.cssText = `
           position: absolute;
-          background: var(--bg-secondary);
+          background: var(--panel);
           border: 2px solid var(--accent);
           border-radius: 12px;
           box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
           backdrop-filter: blur(10px);
-          z-index: 1000;
+          z-index: 10001;
           max-height: min(250px, 40vh);
           overflow-y: auto;
           min-width: min(280px, 90vw);
@@ -1214,6 +1281,10 @@
           transform: translateY(-10px) scale(0.95);
           transition: all 0.2s ease;
           -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
+          will-change: transform, opacity;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
         `;
         
         // Calcular posição baseada no cursor
@@ -1235,26 +1306,37 @@
         let left, top;
         
         if (isMobile) {
-          // Em mobile, centralizar horizontalmente e posicionar abaixo do textarea
-          left = Math.max(10, (viewportWidth - 300) / 2);
-          top = textareaRect.bottom + 10;
+          // Em mobile, posicionar de forma mais estável
+          const textareaTop = textareaRect.top + window.scrollY;
+          const textareaBottom = textareaRect.bottom + window.scrollY;
           
-          // Se não couber na tela, posicionar acima
-          if (top + 200 > viewportHeight) {
-            top = textareaRect.top - 210;
+          // Centralizar horizontalmente com margem
+          left = Math.max(10, Math.min((viewportWidth - 300) / 2, viewportWidth - 310));
+          
+          // Posicionar preferencialmente abaixo do textarea
+          top = textareaBottom + 10;
+          
+          // Se não couber na parte inferior visível da tela, posicionar acima
+          if (top + 200 > window.scrollY + viewportHeight) {
+            top = Math.max(window.scrollY + 10, textareaTop - 210);
           }
+          
+          // Garantir que não saia da tela
+          top = Math.max(window.scrollY + 10, Math.min(top, window.scrollY + viewportHeight - 220));
+          
         } else {
           // Desktop: posição baseada no cursor
           left = textareaRect.left + (currentColumn * charWidth) + 10;
-          top = textareaRect.top + (currentLine * lineHeight) + 25;
+          top = textareaRect.top + (currentLine * lineHeight) + 25 + window.scrollY;
           
           // Ajustar se sair da tela
           left = Math.min(left, viewportWidth - 320);
-          top = Math.min(top, viewportHeight - 200);
+          top = Math.min(top, window.scrollY + viewportHeight - 200);
         }
         
         autocompleteContainer.style.left = Math.max(10, left) + 'px';
         autocompleteContainer.style.top = Math.max(10, top) + 'px';
+        autocompleteContainer.style.position = 'absolute';
         
         suggestions.forEach((suggestion, index) => {
           const item = document.createElement('div');
@@ -1274,21 +1356,31 @@
             touch-action: manipulation;
           `;
           
+          // Mostrar diferentes formatos baseado no contexto
+          const isInside = suggestion.isInsideVariable;
+          const contextInfo = isInside ? 'Completar variável' : 'Inserir variável';
+          const displayCode = isInside ? suggestion.key + '}}' : '{{' + suggestion.key + '}}';
+          
           item.innerHTML = `
-            <div style="font-weight: 600; color: var(--accent); font-size: 15px; margin-bottom: 6px; line-height: 1.2;">${suggestion.label}</div>
-            <div style="font-size: 13px; color: var(--text-muted); font-family: 'Courier New', monospace; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px; display: inline-block; line-height: 1.3;">{{${suggestion.key}}}</div>
+            <div style="font-weight: 600; color: var(--accent); font-size: 15px; margin-bottom: 6px; line-height: 1.2;">
+              ${suggestion.label}
+              <span style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 8px;">${contextInfo}</span>
+            </div>
+            <div style="font-size: 13px; color: var(--text-muted); font-family: 'Courier New', monospace; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px; display: inline-block; line-height: 1.3;">${displayCode}</div>
           `;
           
           item.addEventListener('click', () => selectSuggestion(suggestion));
           item.addEventListener('touchend', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             selectSuggestion(suggestion);
           });
           item.addEventListener('mouseenter', () => {
             selectedIndex = index;
             updateSelection();
           });
-          item.addEventListener('touchstart', () => {
+          item.addEventListener('touchstart', (e) => {
+            e.preventDefault();
             selectedIndex = index;
             updateSelection();
           });
@@ -1314,7 +1406,20 @@
             background: rgba(255,255,255,0.02);
             text-align: center;
           `;
-          footer.innerHTML = `↑↓ navegar • Enter selecionar • Esc fechar`;
+          
+          const hasInsideVariable = suggestions.some(s => s.isInsideVariable);
+          const hasOutsideVariable = suggestions.some(s => !s.isInsideVariable);
+          
+          let footerText = '↑↓ navegar • Enter selecionar • Esc fechar';
+          if (hasInsideVariable && hasOutsideVariable) {
+            footerText += ' • Completar {{}} ou inserir nova variável';
+          } else if (hasInsideVariable) {
+            footerText += ' • Completando variável dentro de {{}}';
+          } else {
+            footerText += ' • Inserindo nova variável';
+          }
+          
+          footer.innerHTML = footerText;
           autocompleteContainer.appendChild(footer);
         }
         
@@ -1329,6 +1434,12 @@
         selectedIndex = 0;
         customAutocompleteActive = true;
         updateSelection();
+        
+        // Em mobile, apenas prevenir scroll do autocomplete, não do body
+        if (window.innerWidth <= 768) {
+          autocompleteContainer.style.position = 'fixed';
+          autocompleteContainer.style.zIndex = '10000';
+        }
         
         // Animar entrada
         requestAnimationFrame(() => {
@@ -1415,27 +1526,19 @@
         const cursorPos = textarea.selectionStart;
         const text = textarea.value;
         
-        // Encontrar o início da variável atual (procurar por {{)
-        let start = cursorPos;
-        let foundOpenBrace = false;
+        // Usar as informações do contexto da sugestão
+        const searchStart = suggestion.searchStart;
+        const searchEnd = suggestion.searchEnd;
+        const insertText = suggestion.insertText;
         
-        // Procurar {{ antes do cursor
-        while (start >= 2) {
-          if (text.substring(start - 2, start) === '{{') {
-            foundOpenBrace = true;
-            break;
-          }
-          start--;
-        }
-        
-        if (foundOpenBrace) {
-          // Substituir o conteúdo entre {{ e cursor com a variável selecionada
-          const before = text.substring(0, start);
-          const after = text.substring(cursorPos);
-          const newText = before + suggestion.key + '}}' + after;
+        if (searchStart >= 0) {
+          // Substituir o texto de busca com a variável selecionada
+          const before = text.substring(0, searchStart);
+          const after = text.substring(searchEnd);
+          const newText = before + insertText + after;
           
           textarea.value = newText;
-          const newCursorPos = start + suggestion.key.length + 2;
+          const newCursorPos = searchStart + insertText.length;
           textarea.setSelectionRange(newCursorPos, newCursorPos);
           
           // Disparar eventos
@@ -1443,22 +1546,29 @@
         }
         
         hideAutocomplete();
-        textarea.focus();
+        
+        // Focar sem prevenir scroll apenas em desktop
+        if (window.innerWidth > 768) {
+          textarea.focus({ preventScroll: true });
+        } else {
+          textarea.focus();
+        }
       }
 
       function checkForAutocomplete() {
         const cursorPos = textarea.selectionStart;
         const text = textarea.value;
         
-        // Encontrar o contexto atual - buscar {{ mais próximo antes do cursor
         let variableStart = -1;
         let searchText = '';
+        let isInsideVariable = false;
         
-        // Buscar {{ trabalhando backwards do cursor
+        // Primeiro: verificar se estamos dentro de {{}}
         for (let i = cursorPos - 1; i >= 1; i--) {
           if (text.substring(i - 1, i + 1) === '{{') {
             variableStart = i + 1; // Posição após {{
             searchText = text.substring(i + 1, cursorPos);
+            isInsideVariable = true;
             break;
           }
           // Se encontrar }} antes de {{, não estamos em uma variável
@@ -1467,12 +1577,38 @@
           }
         }
         
-        // Se encontrou {{ e não há }} no texto de busca
-        if (variableStart >= 0 && !searchText.includes('}}')) {
+        // Se não estamos dentro de {{}}, verificar se estamos digitando uma palavra
+        if (!isInsideVariable) {
+          // Buscar o início da palavra atual (letras, números, underscore)
+          let wordStart = cursorPos;
+          while (wordStart > 0 && /[a-zA-Z0-9_]/.test(text[wordStart - 1])) {
+            wordStart--;
+          }
+          
+          // Se temos pelo menos 2 caracteres de uma palavra
+          if (cursorPos - wordStart >= 2) {
+            searchText = text.substring(wordStart, cursorPos);
+            variableStart = wordStart;
+            isInsideVariable = false;
+          }
+        }
+        
+        // Se temos texto para buscar (dentro de {{}} ou palavra normal)
+        if (searchText && (isInsideVariable || (!isInsideVariable && searchText.length >= 2))) {
+          // Se estamos dentro de {{}} e há }}, não mostrar autocomplete
+          if (isInsideVariable && searchText.includes('}}')) {
+            hideAutocomplete();
+            return;
+          }
+          
           // Filtrar sugestões
           const allSuggestions = [
-            { key: 'campanha', label: 'Nome da Campanha' },
-            ...state.variaveis.map(v => ({ key: v.nome, label: v.label }))
+            { key: 'campanha', label: 'Nome da Campanha', insertText: isInsideVariable ? 'campanha}}' : '{{campanha}}' },
+            ...state.variaveis.map(v => ({ 
+              key: v.nome, 
+              label: v.label,
+              insertText: isInsideVariable ? v.nome + '}}' : '{{' + v.nome + '}}'
+            }))
           ];
           
           const filteredSuggestions = allSuggestions.filter(suggestion => {
@@ -1482,6 +1618,13 @@
           });
           
           if (filteredSuggestions.length > 0) {
+            // Adicionar informação sobre o contexto
+            filteredSuggestions.forEach(suggestion => {
+              suggestion.isInsideVariable = isInsideVariable;
+              suggestion.searchStart = variableStart;
+              suggestion.searchEnd = cursorPos;
+            });
+            
             showAutocomplete(filteredSuggestions, cursorPos);
           } else {
             hideAutocomplete();
