@@ -1,6 +1,6 @@
 # 🎉 Gerador de Mensagens Personalizadas para WhatsApp
 
-Um gerador universal de mensagens personalizado para envio via WhatsApp, **100% customizável** e compatível com GitHub Pages.
+Um gerador universal de mensagens personalizado para envio via WhatsApp, **100% customizável** .
 
 ## 🚀 Funcionalidades Principais
 

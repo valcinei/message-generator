@@ -205,21 +205,10 @@
             <div id="variaveisDisponiveis" class="mt-2 small text-muted"></div>
           </div>
 
-          <!-- Botões de ação -->
+          <!-- Botões de ação para template -->
           <div class="d-flex flex-wrap gap-2">
             <button class="btn btn-primary" id="btnCarregarExemplo">
-              <i class="bi bi-file-earmark-plus me-1"></i>Carregar exemplo
-            </button>
-            <label for="csv" class="btn btn-outline-secondary">
-              <i class="bi bi-file-earmark-csv me-1"></i>Importar CSV
-            </label>
-            <input id="csv" class="d-none" type="file" accept=".csv"/>
-            <label for="jsonImport" class="btn btn-outline-secondary">
-              <i class="bi bi-file-earmark-code me-1"></i>Importar JSON
-            </label>
-            <input id="jsonImport" class="d-none" type="file" accept=".json"/>
-            <button class="btn btn-outline-secondary" id="btnLimpar">
-              <i class="bi bi-trash me-1"></i>Limpar lista
+              <i class="bi bi-file-earmark-plus me-1"></i>Carregar exemplo completo
             </button>
             <button class="btn btn-outline-secondary" id="btnSalvarConfig">
               <i class="bi bi-bookmark me-1"></i>Salvar configuração
@@ -263,14 +252,48 @@
     <div class="custom-card">
       <h2><i class="bi bi-table me-2"></i>2) Registros</h2>
       <p class="text-muted mb-3">Adicione os dados que serão utilizados nas mensagens personalizadas.</p>
-      <div class="d-flex flex-wrap gap-2 mb-3">
-        <button class="btn btn-primary" id="btnNovaLinha">
-          <i class="bi bi-plus-circle me-1"></i>Adicionar registro
-        </button>
-        <button class="btn btn-success" id="btnGerar">
-          <i class="bi bi-magic me-1"></i>Gerar mensagens
-        </button>
+      
+      <!-- Controles de dados -->
+      <div class="row g-2 mb-3">
+        <div class="col-12">
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <!-- Adicionar registros -->
+            <button class="btn btn-primary" id="btnNovaLinha">
+              <i class="bi bi-plus-circle me-1"></i>Adicionar registro
+            </button>
+            
+            <!-- Importar dados -->
+            <div class="btn-group">
+              <label for="csv" class="btn btn-outline-info">
+                <i class="bi bi-file-earmark-csv me-1"></i>Importar CSV
+              </label>
+              <input id="csv" class="d-none" type="file" accept=".csv"/>
+              <label for="jsonImport" class="btn btn-outline-info">
+                <i class="bi bi-file-earmark-code me-1"></i>Importar JSON
+              </label>
+              <input id="jsonImport" class="d-none" type="file" accept=".json"/>
+            </div>
+            
+            <!-- Gerenciar listas -->
+            <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalGerenciarDados">
+              <i class="bi bi-people me-1"></i>Gerenciar Listas
+            </button>
+            
+            <!-- Ações destrutivas -->
+            <button class="btn btn-outline-danger" id="btnLimpar">
+              <i class="bi bi-trash me-1"></i>Limpar registros
+            </button>
+            
+            <!-- Gerar mensagens -->
+            <div class="ms-auto">
+              <button class="btn btn-success btn-lg" id="btnGerar">
+                <i class="bi bi-magic me-2"></i>Gerar Mensagens
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
+      
       <div class="table-responsive">
         <table class="table table-hover" id="tbl" aria-label="Tabela de registros">
           <thead class="table-light">
@@ -396,23 +419,30 @@
           <ul class="nav nav-tabs mb-3" id="tabsDados" role="tablist">
             <li class="nav-item" role="presentation">
               <button class="nav-link active" id="tab-clientes" data-bs-toggle="tab" data-bs-target="#pane-clientes" type="button" role="tab">
-                <i class="bi bi-people me-1"></i>Clientes Salvos
+                <i class="bi bi-people me-1"></i>Listas de Registros
               </button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="tab-configs" data-bs-toggle="tab" data-bs-target="#pane-configs" type="button" role="tab">
-                <i class="bi bi-gear me-1"></i>Configurações
+                <i class="bi bi-gear me-1"></i>Configurações Completas
               </button>
             </li>
           </ul>
           
           <div class="tab-content" id="tabsContent">
-            <!-- Tab Clientes -->
+            <!-- Tab Registros/Clientes -->
             <div class="tab-pane fade show active" id="pane-clientes" role="tabpanel">
+              <div class="alert alert-info d-flex align-items-center mb-3">
+                <i class="bi bi-info-circle me-2"></i>
+                <div>
+                  <strong>Listas de Registros:</strong> Salvam apenas os dados dos registros (tabela) e as variáveis configuradas. 
+                  Útil para reutilizar diferentes grupos de clientes/produtos.
+                </div>
+              </div>
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0">Listas de Clientes</h6>
+                <h6 class="mb-0">Suas Listas Salvas</h6>
                 <button class="btn btn-sm btn-primary" id="btnSalvarClientes">
-                  <i class="bi bi-plus-circle me-1"></i>Salvar Lista Atual
+                  <i class="bi bi-floppy me-1"></i>Salvar Lista Atual
                 </button>
               </div>
               <div id="listaClientesSalvos"></div>
@@ -420,8 +450,15 @@
             
             <!-- Tab Configurações -->
             <div class="tab-pane fade" id="pane-configs" role="tabpanel">
+              <div class="alert alert-warning d-flex align-items-center mb-3">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <div>
+                  <strong>Configurações Completas:</strong> Salvam tudo (template, variáveis, registros, nome da campanha). 
+                  Útil para salvar campanhas completas para reutilizar depois.
+                </div>
+              </div>
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0">Configurações Completas</h6>
+                <h6 class="mb-0">Configurações Salvas</h6>
                 <div class="btn-group btn-group-sm">
                   <button class="btn btn-outline-secondary" onclick="exportarDados()">
                     <i class="bi bi-download me-1"></i>Exportar Tudo
@@ -675,6 +712,56 @@
       });
       
       updateConfigCount();
+      atualizarListaConfigsModal(); // Atualizar também o modal
+    }
+
+    function atualizarListaConfigsModal() {
+      const savedConfigs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const container = el('#listaConfigsSalvas');
+      if (!container) return;
+      
+      container.innerHTML = '';
+
+      const nomes = Object.keys(savedConfigs).sort();
+      if (nomes.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted p-3"><i class="bi bi-inbox"></i><br>Nenhuma configuração completa salva ainda</div>';
+        return;
+      }
+
+      nomes.forEach(nome => {
+        const config = savedConfigs[nome];
+        const div = document.createElement('div');
+        div.className = 'border rounded p-3 mb-2';
+        div.style.background = 'var(--input-bg)';
+        div.innerHTML = `
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="mb-1"><i class="bi bi-gear me-1"></i>${nome}</h6>
+              <small class="text-muted">
+                <i class="bi bi-building me-1"></i>${config.nomeCampanha || 'Sem nome'} • 
+                <i class="bi bi-person me-1"></i>${config.registros?.length || 0} registros • 
+                <i class="bi bi-tags me-1"></i>${config.variaveis?.length || 0} variáveis • 
+                ${new Date(config.timestamp).toLocaleDateString('pt-BR')}
+              </small>
+            </div>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-primary" onclick="carregarConfigCompleta('${nome}')" title="Carregar configuração completa">
+                <i class="bi bi-arrow-down-circle"></i>
+              </button>
+              <button class="btn btn-outline-danger" onclick="excluirConfiguracao('${nome}')" title="Excluir configuração">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function carregarConfigCompleta(nome) {
+      carregarDados(nome);
+      // Fechar modal
+      bootstrap.Modal.getInstance(el('#modalGerenciarDados')).hide();
     }
 
     function exportarDados() {
@@ -1332,11 +1419,11 @@ Entre em contato pelo WhatsApp para mais detalhes.`;
     function salvarListaClientes() {
       const registros = lerTabela();
       if (registros.length === 0) {
-        mostrarAlerta('Aviso', 'Não há registros para salvar.', 'warning');
+        mostrarAlerta('Aviso', 'Não há registros para salvar. Adicione alguns dados primeiro.', 'warning');
         return;
       }
 
-      mostrarModalInput('Salvar Lista de Clientes', 'Digite um nome para esta lista:', (nome) => {
+      mostrarModalInput('Salvar Lista de Registros', 'Digite um nome para esta lista de dados:', (nome) => {
         if (!nome.trim()) return;
         
         const listas = JSON.parse(localStorage.getItem('message-generator-clientes') || '{}');
@@ -1348,7 +1435,7 @@ Entre em contato pelo WhatsApp para mais detalhes.`;
         
         localStorage.setItem('message-generator-clientes', JSON.stringify(listas));
         atualizarListaClientesSalvos();
-        mostrarAlerta('Sucesso', `Lista "${nome.trim()}" salva com sucesso!`, 'success');
+        mostrarAlerta('Sucesso', `Lista de registros "${nome.trim()}" salva com sucesso!`, 'success');
       });
     }
 
@@ -1359,7 +1446,7 @@ Entre em contato pelo WhatsApp para mais detalhes.`;
 
       const nomes = Object.keys(listas).sort();
       if (nomes.length === 0) {
-        container.innerHTML = '<div class="text-center text-muted p-3"><i class="bi bi-inbox"></i><br>Nenhuma lista de clientes salva</div>';
+        container.innerHTML = '<div class="text-center text-muted p-3"><i class="bi bi-inbox"></i><br>Nenhuma lista de registros salva ainda</div>';
         return;
       }
 
@@ -1371,11 +1458,15 @@ Entre em contato pelo WhatsApp para mais detalhes.`;
         div.innerHTML = `
           <div class="d-flex justify-content-between align-items-start">
             <div>
-              <h6 class="mb-1">${nome}</h6>
-              <small class="text-muted">${lista.registros.length} registros • ${new Date(lista.timestamp).toLocaleDateString('pt-BR')}</small>
+              <h6 class="mb-1"><i class="bi bi-table me-1"></i>${nome}</h6>
+              <small class="text-muted">
+                <i class="bi bi-person me-1"></i>${lista.registros.length} registros • 
+                <i class="bi bi-tags me-1"></i>${lista.variaveis.length} variáveis • 
+                ${new Date(lista.timestamp).toLocaleDateString('pt-BR')}
+              </small>
             </div>
             <div class="btn-group btn-group-sm">
-              <button class="btn btn-outline-primary" onclick="carregarListaClientes('${nome}')" title="Carregar lista">
+              <button class="btn btn-outline-primary" onclick="carregarListaClientes('${nome}')" title="Carregar esta lista">
                 <i class="bi bi-arrow-down-circle"></i>
               </button>
               <button class="btn btn-outline-danger" onclick="excluirListaClientes('${nome}')" title="Excluir lista">
@@ -1393,7 +1484,7 @@ Entre em contato pelo WhatsApp para mais detalhes.`;
       const lista = listas[nome];
       
       if (!lista) {
-        mostrarAlerta('Erro', 'Lista não encontrada.', 'danger');
+        mostrarAlerta('Erro', 'Lista de registros não encontrada.', 'danger');
         return;
       }
 
@@ -1414,16 +1505,16 @@ Entre em contato pelo WhatsApp para mais detalhes.`;
       // Fechar modal
       bootstrap.Modal.getInstance(el('#modalGerenciarDados')).hide();
       
-      mostrarAlerta('Sucesso', `Lista "${nome}" carregada com sucesso!`, 'success');
+      mostrarAlerta('Sucesso', `Lista de registros "${nome}" carregada com sucesso!`, 'success');
     }
 
     function excluirListaClientes(nome) {
-      mostrarModalConfirmacao('Excluir Lista', `Tem certeza que deseja excluir a lista "${nome}"?`, () => {
+      mostrarModalConfirmacao('Excluir Lista de Registros', `Tem certeza que deseja excluir a lista "${nome}"?`, () => {
         const listas = JSON.parse(localStorage.getItem('message-generator-clientes') || '{}');
         delete listas[nome];
         localStorage.setItem('message-generator-clientes', JSON.stringify(listas));
         atualizarListaClientesSalvos();
-        mostrarAlerta('Sucesso', `Lista "${nome}" excluída com sucesso!`, 'success');
+        mostrarAlerta('Sucesso', `Lista de registros "${nome}" excluída com sucesso!`, 'success');
       });
     }
 
@@ -1490,12 +1581,12 @@ Entre em contato pelo WhatsApp para mais detalhes.`;
       if (ev.target.id === 'btnGerar') gerar();
       if (ev.target.id === 'btnCarregarExemplo') carregarExemplo();
       if (ev.target.id === 'btnLimpar') {
-        mostrarModalConfirmacao('Limpar Lista', 'Tem certeza que deseja limpar toda a lista de registros?', () => {
+        mostrarModalConfirmacao('Limpar Registros', 'Tem certeza que deseja limpar todos os registros da tabela? Esta ação não pode ser desfeita.', () => {
           els('#tbl tbody tr').forEach(tr => tr.remove());
           el('#lista').innerHTML = '';
           addRow({});
           salvarDados();
-          mostrarAlerta('Sucesso', 'Lista limpa com sucesso!', 'success');
+          mostrarAlerta('Sucesso', 'Registros limpos com sucesso!', 'success');
         });
       }
       if (ev.target.classList.contains('copy-msg')) {
@@ -1569,6 +1660,7 @@ Entre em contato pelo WhatsApp para mais detalhes.`;
       setupAutoSave();
       atualizarListaConfiguracoes();
       atualizarListaClientesSalvos();
+      atualizarListaConfigsModal();
       
       // Carregar auto-save se existir
       const autosaveData = localStorage.getItem(AUTOSAVE_KEY);
