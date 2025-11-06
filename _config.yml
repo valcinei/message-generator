@@ -1,0 +1,27 @@
+# GitHub Pages Configuration
+
+# Set the homepage file
+plugins:
+  - jekyll-redirect-from
+
+# Redirect from root to main file
+redirect_from:
+  - /
+
+# Basic site settings
+title: "Gerador de Mensagens de Cashback"
+description: "Ferramenta para gerar mensagens personalizadas de cashback para WhatsApp"
+author: "Message Generator"
+
+# Exclude unnecessary files from build
+exclude:
+  - README.md
+  - .gitignore
+  - node_modules/
+  - "*.json"
+  - "*.md"
+
+# Include all HTML files
+include:
+  - "generator-messages.html"
+  - "index.html"

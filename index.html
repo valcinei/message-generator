@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Gerador de mensagens personalizadas para WhatsApp - Crie templates dinâmicos com variáveis customizáveis">
+  <meta name="keywords" content="whatsapp, mensagens, gerador, templates, marketing, campanhas">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="color-scheme" content="dark light">
+  <title>Gerador de Mensagens Personalizadas • WhatsApp</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  
+  <style>
+    :root{
+      --bg:#0f172a; --panel:#111827; --muted:#94a3b8; --text:#e5e7eb; --accent:#22c55e; --accent-2:#16a34a; --red:#ef4444; --blue:#3b82f6;
+      --border:#1f2937; --input-bg:#0b1220; --input-border:#243244;
+      /* Cores específicas para melhor contraste */
+      --text-primary:#f8fafc; --text-secondary:#cbd5e1; --text-muted:#94a3b8;
+      --success:#10b981; --warning:#f59e0b; --info:#3b82f6;
+    }
+    
+    [data-theme="light"] {
+      --bg:#ffffff; --panel:#f8f9fa; --muted:#6c757d; --text:#212529; --accent:#198754; --accent-2:#157347; --red:#dc3545; --blue:#0d6efd;
+      --border:#dee2e6; --input-bg:#ffffff; --input-border:#ced4da;
+      /* Cores específicas para tema claro */
+      --text-primary:#1f2937; --text-secondary:#374151; --text-muted:#6b7280;
+      --success:#059669; --warning:#d97706; --info:#2563eb;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial; background:var(--bg); color:var(--text-primary); transition: all 0.3s ease;}
+    .container-fluid{max-width:1200px;margin:0 auto;padding:32px 16px}
+    h1{font-size:clamp(20px,3vw,28px);margin:0 0 16px; color:var(--text-primary);}
+    h2{font-size:18px;margin:0 0 12px; color:var(--text-primary);}
+    p.lead{color:var(--text-secondary);margin:0 0 20px}
+    
+    /* Cards customizados */
+    .custom-card{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.1); margin-bottom:16px; transition: all 0.3s ease;}
+    [data-theme="dark"] .custom-card{box-shadow:0 10px 30px rgba(0,0,0,.25);}
+    
+    /* Inputs customizados - melhor contraste */
+    .form-control, .form-select, textarea{background:var(--input-bg); color:var(--text-primary); border:1px solid var(--input-border); border-radius:10px;}
+    .form-control:focus, .form-select:focus, textarea:focus{background:var(--input-bg); color:var(--text-primary); border-color:var(--accent); box-shadow:0 0 0 0.2rem rgba(34, 197, 94, 0.25);}
+    .form-control::placeholder, textarea::placeholder{color:var(--text-muted);}
+    
+    /* Labels melhor contraste */
+    .form-label{color:var(--text-secondary); font-weight: 500;}
+    
+    /* Botões customizados */
+    .btn-primary{background:var(--accent); border-color:var(--accent); color:#04210e; font-weight: 600;}
+    .btn-primary:hover{background:var(--accent-2); border-color:var(--accent-2); color:#04210e;}
+    .btn-outline-secondary{color:var(--text-primary); border-color:var(--border); background:var(--input-bg);}
+    .btn-outline-secondary:hover{background:var(--border); color:var(--text-primary); border-color:var(--border);}
+    .btn-danger{background:var(--red); color:#ffffff;}
+    .btn-info{background:var(--blue); color:#ffffff;}
+    .btn-success{background:var(--success); color:#ffffff;}
+    
+    /* Tema switcher melhorado */
+    .theme-switcher{position:fixed; top:20px; right:20px; z-index:1050;}
+    .theme-switcher .btn{border-color:var(--border); background:var(--panel); color:var(--text-primary);}
+    .theme-switcher .btn:hover{background:var(--input-bg); border-color:var(--accent); color:var(--accent);}
+    .theme-switcher .btn.following-system{border-color:var(--info); color:var(--info);}
+    .theme-switcher .btn.following-system::after{content:''; position:absolute; top:-2px; right:-2px; width:6px; height:6px; background:var(--info); border-radius:50%; border:1px solid var(--panel);}
+    
+    /* Bootstrap overrides para melhor contraste */
+    .btn-outline-primary{color:var(--accent); border-color:var(--accent);}
+    .btn-outline-primary:hover{background:var(--accent); color:#04210e; border-color:var(--accent);}
+    .btn-outline-danger{color:var(--red); border-color:var(--red);}
+    .btn-outline-danger:hover{background:var(--red); color:#ffffff; border-color:var(--red);}
+    
+    /* Alert e feedback visual */
+    .fw-semibold{color:var(--text-primary) !important;}
+    .fw-bold{color:var(--text-primary) !important;}
+    
+    /* Fix para dropdown do Bootstrap no tema escuro */
+    .dropdown-menu{background:var(--panel); border:1px solid var(--border);}
+    .dropdown-item{color:var(--text-primary);}
+    .dropdown-item:hover{background:var(--input-bg); color:var(--text-primary);}
+    
+    /* Melhorar contraste em elementos pequenos */
+    .small, .form-text{color:var(--text-muted) !important;}
+    
+    /* Scrollbar personalizada para tema escuro */
+    [data-theme="dark"] ::-webkit-scrollbar{width:8px;}
+    [data-theme="dark"] ::-webkit-scrollbar-track{background:var(--input-bg);}
+    [data-theme="dark"] ::-webkit-scrollbar-thumb{background:var(--border); border-radius:4px;}
+    [data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:var(--text-muted);}
+    
+    /* Table customizada - melhor contraste */
+    .table{color:var(--text-primary); --bs-table-bg:transparent;}
+    .table th{color:var(--text-secondary); border-color:var(--border); font-weight: 600; background:var(--input-bg);}
+    .table td{border-color:var(--border); color:var(--text-primary);}
+    .table tbody tr:hover{background-color:var(--input-bg);}
+    .table-light{--bs-table-bg:var(--input-bg); --bs-table-color:var(--text-primary);}
+    
+    /* Preview customizado */
+    .preview{white-space:pre-wrap; background:var(--input-bg); border:1px solid var(--input-border); padding:10px; border-radius:10px; min-height:120px; color:var(--text-primary);}
+    
+    /* Variáveis dinâmicas */
+    .variable-item{background:var(--input-bg); border:1px solid var(--input-border); border-radius:8px; padding:12px; margin-bottom:8px}
+    .variable-name{font-weight:600; color:var(--text-primary)}
+    
+    /* Badges melhor contraste */
+    .badge{color:#ffffff;}
+    .bg-secondary{background-color:var(--text-muted) !important;}
+    
+    /* Text utilities com melhor contraste */
+    .text-muted{color:var(--text-muted) !important;}
+    .text-success{color:var(--success) !important;}
+    .text-danger{color:var(--red) !important;}
+    .small{color:var(--text-muted);}
+    
+    /* Configurações salvas - mais discretas */
+    .config-summary{cursor:pointer; padding:8px 12px; background:var(--input-bg); border:1px solid var(--input-border); border-radius:6px; font-size:14px; display:flex; align-items:center; gap:8px; color:var(--text-primary);}
+    .config-summary:hover{background:var(--border); color:var(--text-primary);}
+    .config-summary i{color:var(--accent);}
+    .config-dropdown{display:none; position:absolute; top:100%; left:0; right:0; background:var(--panel); border:1px solid var(--border); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:1000; max-height:300px; overflow-y:auto;}
+    [data-theme="dark"] .config-dropdown{box-shadow:0 4px 12px rgba(0,0,0,0.35);}
+    .config-dropdown.show{display:block;}
+    .config-item{padding:8px 12px; border-bottom:1px solid var(--border); cursor:pointer; color:var(--text-primary);}
+    .config-item:hover{background:var(--input-bg);}
+    .config-item:last-child{border-bottom:none;}
+    
+    /* Auto-save indicator */
+    .autosave-indicator{position:fixed; bottom:20px; right:20px; background:var(--accent); color:#04210e; padding:8px 12px; border-radius:6px; font-size:12px; opacity:0; transition:opacity 0.3s; z-index:1000; font-weight: 600;}
+    .autosave-indicator.show{opacity:1}
+    
+    /* Lista de mensagens */
+    .message-item{border:1px solid var(--border); border-radius:12px; padding:12px; background:var(--input-bg); margin-bottom:12px}
+    .message-item h6{color:var(--text-primary);}
+    
+    /* Code elements */
+    code{background:var(--input-bg); color:var(--accent); padding:2px 4px; border-radius:4px; font-size:0.9em;}
+    
+    /* Responsividade adicional */
+    @media(max-width:768px){
+      .container-fluid{padding:16px 12px}
+      .theme-switcher{top:10px; right:10px;}
+      .config-dropdown{position:fixed; top:auto; bottom:0; left:0; right:0; max-height:50vh; border-radius:12px 12px 0 0;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Theme Switcher -->
+  <div class="theme-switcher">
+    <button class="btn btn-outline-secondary btn-sm" id="themeToggle" title="Alternar tema">
+      <i class="bi bi-moon-fill" id="themeIcon"></i>
+    </button>
+  </div>
+
+  <div class="container-fluid">
+    <div class="text-center mb-4">
+      <h1><i class="bi bi-whatsapp text-success me-2"></i>Gerador de Mensagens Personalizadas</h1>
+      <p class="lead">Defina suas próprias variáveis, configure templates e gere links <strong>wa.me</strong> personalizados para qualquer tipo de campanha. <strong>💾 Seus dados são salvos automaticamente.</strong></p>
+    </div>
+
+    <div class="row">
+      <!-- Configurações / Template -->
+      <div class="col-lg-8 mb-4">
+        <div class="custom-card">
+          <h2><i class="bi bi-gear me-2"></i>1) Configurações da Mensagem</h2>
+          
+          <!-- Configurações básicas -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Nome da campanha/empresa</label>
+              <input id="nomeCampanha" type="text" class="form-control" placeholder="Ex.: Minha Empresa" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Campo telefone (obrigatório)</label>
+              <select id="campoTelefone" class="form-select">
+                <option value="telefone">telefone</option>
+                <option value="whatsapp">whatsapp</option>
+                <option value="celular">celular</option>
+                <option value="phone">phone</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Gerenciamento de Variáveis -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <label class="form-label mb-0 fw-bold">Variáveis Personalizadas</label>
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-info" id="btnAdicionarVariavel" data-bs-toggle="modal" data-bs-target="#modalAdicionarVariavel">
+                  <i class="bi bi-plus-circle me-1"></i>Adicionar Variável
+                </button>
+                <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalGerenciarDados">
+                  <i class="bi bi-database me-1"></i>Gerenciar
+                </button>
+              </div>
+            </div>
+            <div id="listaVariaveis" class="mb-2"></div>
+            <small class="text-muted">Arraste para reordenar as variáveis. O campo telefone é obrigatório e sempre incluído.</small>
+          </div>
+
+          <!-- Template da mensagem -->
+          <div class="mb-3">
+            <label class="form-label">Template de mensagem</label>
+            <textarea id="template" class="form-control" rows="6" placeholder="Digite sua mensagem usando {{variavel}} para substituições..."></textarea>
+            <small class="text-muted mt-1 d-block">Use <code>{{nome_da_variavel}}</code> para inserir valores. Variáveis disponíveis serão listadas automaticamente.</small>
+            <div id="variaveisDisponiveis" class="mt-2 small text-muted"></div>
+          </div>
+
+          <!-- Botões de ação -->
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-primary" id="btnCarregarExemplo">
+              <i class="bi bi-file-earmark-plus me-1"></i>Carregar exemplo
+            </button>
+            <label for="csv" class="btn btn-outline-secondary">
+              <i class="bi bi-file-earmark-csv me-1"></i>Importar CSV
+            </label>
+            <input id="csv" class="d-none" type="file" accept=".csv"/>
+            <label for="jsonImport" class="btn btn-outline-secondary">
+              <i class="bi bi-file-earmark-code me-1"></i>Importar JSON
+            </label>
+            <input id="jsonImport" class="d-none" type="file" accept=".json"/>
+            <button class="btn btn-outline-secondary" id="btnLimpar">
+              <i class="bi bi-trash me-1"></i>Limpar lista
+            </button>
+            <button class="btn btn-outline-secondary" id="btnSalvarConfig">
+              <i class="bi bi-bookmark me-1"></i>Salvar configuração
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Configurações Salvas - mais discretas -->
+      <div class="col-lg-4 mb-4">
+        <div class="custom-card">
+          <div class="position-relative">
+            <div class="config-summary" id="configSummary">
+              <i class="bi bi-bookmarks"></i>
+              <span>Configurações Salvas</span>
+              <span class="badge bg-secondary ms-auto" id="configCount">0</span>
+            </div>
+            <div class="config-dropdown" id="configDropdown">
+              <div class="p-2 border-bottom">
+                <div class="d-flex gap-2 mb-2">
+                  <label for="backupFile" class="btn btn-sm btn-outline-secondary flex-fill">
+                    <i class="bi bi-upload me-1"></i>Importar
+                  </label>
+                  <input id="backupFile" class="d-none" type="file" accept=".json"/>
+                  <button class="btn btn-sm btn-outline-secondary flex-fill" onclick="exportarDados()">
+                    <i class="bi bi-download me-1"></i>Exportar
+                  </button>
+                </div>
+                <button class="btn btn-sm btn-outline-primary w-100" onclick="carregarDados()">
+                  <i class="bi bi-arrow-clockwise me-1"></i>Restaurar Auto-save
+                </button>
+              </div>
+              <div id="listaConfiguracoes"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dados dos registros -->
+    <div class="custom-card">
+      <h2><i class="bi bi-table me-2"></i>2) Registros</h2>
+      <p class="text-muted mb-3">Adicione os dados que serão utilizados nas mensagens personalizadas.</p>
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <button class="btn btn-primary" id="btnNovaLinha">
+          <i class="bi bi-plus-circle me-1"></i>Adicionar registro
+        </button>
+        <button class="btn btn-success" id="btnGerar">
+          <i class="bi bi-magic me-1"></i>Gerar mensagens
+        </button>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover" id="tbl" aria-label="Tabela de registros">
+          <thead class="table-light">
+            <tr id="tableHeader"></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Lista de mensagens geradas -->
+    <div class="custom-card">
+      <h2><i class="bi bi-chat-dots me-2"></i>3) Mensagens e Links</h2>
+      <p class="text-muted mb-3">Clique para abrir o WhatsApp com a mensagem. Use "Copiar" para enviar por outro canal.</p>
+      <div id="lista"></div>
+    </div>
+
+    <footer class="text-center text-muted mt-4 pb-4">
+      <small>
+        <strong>Dicas:</strong> 
+        • Números brasileiros podem ser digitados como <em>92 9 9999-9999</em> — normalizamos automaticamente para formato internacional<br>
+        • Use *texto* para negrito e _texto_ para itálico no WhatsApp<br>
+        • Variáveis com valores monetários são formatadas automaticamente em BRL
+      </small>
+    </footer>
+  </div>
+
+  <!-- Indicador de auto-save -->
+  <div id="autosaveIndicator" class="autosave-indicator">
+    <i class="bi bi-cloud-check me-1"></i>Dados salvos automaticamente
+  </div>
+
+  <!-- Modal para adicionar variável -->
+  <div class="modal fade" id="modalAdicionarVariavel" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content" style="background: var(--panel); color: var(--text-primary); border: 1px solid var(--border);">
+        <div class="modal-header" style="border-color: var(--border);">
+          <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Adicionar Nova Variável</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: var(--bs-btn-close-white-filter);"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formVariavel">
+            <div class="mb-3">
+              <label for="nomeVariavel" class="form-label">Nome da variável</label>
+              <input type="text" class="form-control" id="nomeVariavel" placeholder="Ex: produto, valor, data_entrega" required>
+              <div class="form-text">Use apenas letras, números e underscore. Sem espaços.</div>
+            </div>
+            <div class="mb-3">
+              <label for="labelVariavel" class="form-label">Label para exibição</label>
+              <input type="text" class="form-control" id="labelVariavel" placeholder="Ex: Produto, Valor, Data de entrega" required>
+            </div>
+            <div class="mb-3">
+              <label for="tipoVariavel" class="form-label">Tipo de campo</label>
+              <select class="form-select" id="tipoVariavel">
+                <option value="text">Texto</option>
+                <option value="number">Número</option>
+                <option value="date">Data</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer" style="border-color: var(--border);">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btnConfirmarVariavel">Adicionar Variável</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para salvar configuração -->
+  <div class="modal fade" id="modalSalvarConfig" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content" style="background: var(--panel); color: var(--text-primary); border: 1px solid var(--border);">
+        <div class="modal-header" style="border-color: var(--border);">
+          <h5 class="modal-title"><i class="bi bi-bookmark me-2"></i>Salvar Configuração</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: var(--bs-btn-close-white-filter);"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formSalvarConfig">
+            <div class="mb-3">
+              <label for="nomeConfig" class="form-label">Nome da configuração</label>
+              <input type="text" class="form-control" id="nomeConfig" placeholder="Ex: Black Friday 2024, Campanha Natal" required>
+              <div class="form-text">Escolha um nome descritivo para identificar esta configuração.</div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer" style="border-color: var(--border);">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btnConfirmarSalvarConfig">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para confirmar ações -->
+  <div class="modal fade" id="modalConfirmar" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content" style="background: var(--panel); color: var(--text-primary); border: 1px solid var(--border);">
+        <div class="modal-header" style="border-color: var(--border);">
+          <h5 class="modal-title" id="modalConfirmarTitulo">Confirmar Ação</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: var(--bs-btn-close-white-filter);"></button>
+        </div>
+        <div class="modal-body">
+          <p id="modalConfirmarTexto"></p>
+        </div>
+        <div class="modal-footer" style="border-color: var(--border);">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="btnConfirmarAcao">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para gerenciar dados salvos -->
+  <div class="modal fade" id="modalGerenciarDados" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="background: var(--panel); color: var(--text-primary); border: 1px solid var(--border);">
+        <div class="modal-header" style="border-color: var(--border);">
+          <h5 class="modal-title"><i class="bi bi-database me-2"></i>Gerenciar Dados Salvos</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: var(--bs-btn-close-white-filter);"></button>
+        </div>
+        <div class="modal-body">
+          <ul class="nav nav-tabs mb-3" id="tabsDados" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="tab-clientes" data-bs-toggle="tab" data-bs-target="#pane-clientes" type="button" role="tab">
+                <i class="bi bi-people me-1"></i>Clientes Salvos
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-configs" data-bs-toggle="tab" data-bs-target="#pane-configs" type="button" role="tab">
+                <i class="bi bi-gear me-1"></i>Configurações
+              </button>
+            </li>
+          </ul>
+          
+          <div class="tab-content" id="tabsContent">
+            <!-- Tab Clientes -->
+            <div class="tab-pane fade show active" id="pane-clientes" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">Listas de Clientes</h6>
+                <button class="btn btn-sm btn-primary" id="btnSalvarClientes">
+                  <i class="bi bi-plus-circle me-1"></i>Salvar Lista Atual
+                </button>
+              </div>
+              <div id="listaClientesSalvos"></div>
+            </div>
+            
+            <!-- Tab Configurações -->
+            <div class="tab-pane fade" id="pane-configs" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">Configurações Completas</h6>
+                <div class="btn-group btn-group-sm">
+                  <button class="btn btn-outline-secondary" onclick="exportarDados()">
+                    <i class="bi bi-download me-1"></i>Exportar Tudo
+                  </button>
+                  <label for="importarTudo" class="btn btn-outline-secondary">
+                    <i class="bi bi-upload me-1"></i>Importar
+                  </label>
+                  <input id="importarTudo" type="file" accept=".json" class="d-none">
+                </div>
+              </div>
+              <div id="listaConfigsSalvas"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-color: var(--border);">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Estado da aplicação
+    const state = {
+      variaveis: [
+        { nome: 'nome', label: 'Nome completo', tipo: 'text', obrigatorio: true },
+        { nome: 'telefone', label: 'Telefone', tipo: 'text', obrigatorio: true }
+      ],
+      registros: []
+    };
+
+    // Utilidades
+    const el = (sel, ctx=document) => ctx.querySelector(sel);
+    const els = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+
+    // ===== Theme Management =====
+    function initTheme() {
+      const savedTheme = localStorage.getItem('app-theme');
+      
+      if (savedTheme) {
+        // Se o usuário já escolheu um tema, usar esse
+        setTheme(savedTheme);
+      } else {
+        // Detectar tema do sistema automaticamente
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const systemTheme = systemPrefersDark ? 'dark' : 'light';
+        setTheme(systemTheme);
+        
+        // Escutar mudanças no tema do sistema
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+          // Só mudar automaticamente se o usuário não escolheu um tema específico
+          if (!localStorage.getItem('app-theme')) {
+            const newSystemTheme = e.matches ? 'dark' : 'light';
+            setTheme(newSystemTheme, false); // false = não salvar no localStorage
+          }
+        });
+      }
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme, true); // true = salvar escolha do usuário
+    }
+
+    function setTheme(theme, savePreference = true) {
+      document.documentElement.setAttribute('data-theme', theme);
+      
+      if (savePreference) {
+        localStorage.setItem('app-theme', theme);
+      }
+      
+      const icon = el('#themeIcon');
+      const btn = el('#themeToggle');
+      
+      if (theme === 'light') {
+        icon.className = 'bi bi-sun-fill';
+        btn.title = savePreference ? 'Mudar para tema escuro' : 'Tema claro (automático)';
+      } else {
+        icon.className = 'bi bi-moon-fill';
+        btn.title = savePreference ? 'Mudar para tema claro' : 'Tema escuro (automático)';
+      }
+      
+      // Adicionar indicador visual se está seguindo o sistema
+      if (!savePreference) {
+        btn.classList.add('following-system');
+      } else {
+        btn.classList.remove('following-system');
+      }
+      
+      // Atualizar cor do tema no meta tag se existir
+      updateThemeColor(theme);
+    }
+
+    function updateThemeColor(theme) {
+      // Adicionar meta theme-color para mobile
+      let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (!metaThemeColor) {
+        metaThemeColor = document.createElement('meta');
+        metaThemeColor.name = 'theme-color';
+        document.head.appendChild(metaThemeColor);
+      }
+      
+      const colors = {
+        dark: '#0f172a',
+        light: '#ffffff'
+      };
+      
+      metaThemeColor.content = colors[theme];
+    }
+
+    // ===== Configurações salvas discretas =====
+    function initConfigDropdown() {
+      const summary = el('#configSummary');
+      const dropdown = el('#configDropdown');
+      
+      summary.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('show');
+      });
+
+      // Fechar ao clicar fora
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.config-summary') && !e.target.closest('.config-dropdown')) {
+          dropdown.classList.remove('show');
+        }
+      });
+    }
+
+    function updateConfigCount() {
+      const savedConfigs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const count = Object.keys(savedConfigs).length;
+      el('#configCount').textContent = count;
+    }
+
+    // ===== LocalStorage Management =====
+    const STORAGE_KEY = 'message-generator-data';
+    const AUTOSAVE_KEY = 'message-generator-autosave';
+
+    function salvarDados(nome = null) {
+      const dados = {
+        nomeCampanha: el('#nomeCampanha').value.trim(),
+        campoTelefone: el('#campoTelefone').value,
+        template: el('#template').value.trim(),
+        variaveis: state.variaveis,
+        registros: lerTabela(),
+        timestamp: new Date().toISOString()
+      };
+
+      if (nome) {
+        const savedConfigs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        savedConfigs[nome] = dados;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedConfigs));
+        mostrarAlerta('Sucesso', `Configuração "${nome}" salva com sucesso!`, 'success');
+        atualizarListaConfiguracoes();
+      } else {
+        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(dados));
+        mostrarIndicadorAutoSave();
+      }
+    }
+
+    function mostrarIndicadorAutoSave() {
+      const indicator = el('#autosaveIndicator');
+      indicator.classList.add('show');
+      setTimeout(() => indicator.classList.remove('show'), 2000);
+    }
+
+    function carregarDados(nome = null) {
+      let dados;
+      
+      if (nome) {
+        const savedConfigs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        dados = savedConfigs[nome];
+        if (!dados) {
+          mostrarAlerta('Erro', `Configuração "${nome}" não encontrada.`, 'danger');
+          return;
+        }
+      } else {
+        dados = JSON.parse(localStorage.getItem(AUTOSAVE_KEY) || 'null');
+        if (!dados) return;
+      }
+
+      el('#nomeCampanha').value = dados.nomeCampanha || '';
+      el('#campoTelefone').value = dados.campoTelefone || 'telefone';
+      el('#template').value = dados.template || '';
+      
+      if (dados.variaveis) {
+        state.variaveis = dados.variaveis;
+        renderizarVariaveis();
+        renderizarTabela();
+      }
+      
+      if (dados.registros && dados.registros.length > 0) {
+        els('#tbl tbody tr').forEach(tr => tr.remove());
+        dados.registros.forEach(addRow);
+      } else {
+        addRow({});
+      }
+
+      atualizarVariaveisDisponiveis();
+      if (nome) mostrarAlerta('Sucesso', `Configuração "${nome}" carregada com sucesso!`, 'success');
+    }
+
+    function excluirConfiguracao(nome) {
+      mostrarModalConfirmacao('Excluir Configuração', `Tem certeza que deseja excluir a configuração "${nome}"?`, () => {
+        const savedConfigs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        delete savedConfigs[nome];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedConfigs));
+        mostrarAlerta('Sucesso', `Configuração "${nome}" excluída!`, 'success');
+        atualizarListaConfiguracoes();
+      });
+    }
+
+    function atualizarListaConfiguracoes() {
+      const savedConfigs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const lista = el('#listaConfiguracoes');
+      lista.innerHTML = '';
+
+      const nomes = Object.keys(savedConfigs).sort();
+      if (nomes.length === 0) {
+        lista.innerHTML = '<div class="p-3 text-center text-muted small">Nenhuma configuração salva</div>';
+        updateConfigCount();
+        return;
+      }
+
+      nomes.forEach(nome => {
+        const config = savedConfigs[nome];
+        const item = document.createElement('div');
+        item.className = 'config-item';
+        item.innerHTML = `
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="flex-grow-1">
+              <div class="fw-semibold">${nome}</div>
+              <div class="small text-muted">${config.nomeCampanha || 'Sem nome'} • ${config.registros?.length || 0} registros</div>
+              <div class="small text-muted">${new Date(config.timestamp).toLocaleDateString('pt-BR')}</div>
+            </div>
+            <div class="d-flex gap-1">
+              <button class="btn btn-sm btn-outline-primary" onclick="carregarDados('${nome}')" title="Carregar">
+                <i class="bi bi-arrow-down-circle"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="excluirConfiguracao('${nome}')" title="Excluir">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        lista.appendChild(item);
+      });
+      
+      updateConfigCount();
+    }
+
+    function exportarDados() {
+      const savedConfigs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const autosave = JSON.parse(localStorage.getItem(AUTOSAVE_KEY) || 'null');
+      
+      const exportData = {
+        configuracoes: savedConfigs,
+        autosave: autosave,
+        exportado_em: new Date().toISOString()
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `message-generator-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importarDados(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          
+          if (data.configuracoes) {
+            const savedConfigs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            Object.assign(savedConfigs, data.configuracoes);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedConfigs));
+          }
+          
+          if (data.autosave) {
+            localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data.autosave));
+          }
+          
+          alert('Dados importados com sucesso!');
+          atualizarListaConfiguracoes();
+        } catch (e) {
+          alert('Erro ao importar dados. Verifique se o arquivo está correto.');
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    // ===== Gerenciamento de Variáveis =====
+    function adicionarVariavel() {
+      // Esta função agora apenas abre o modal - o modal já está configurado no HTML
+    }
+
+    function confirmarAdicionarVariavel() {
+      const nome = el('#nomeVariavel').value.trim();
+      const label = el('#labelVariavel').value.trim();
+      const tipo = el('#tipoVariavel').value;
+
+      if (!nome || !label) {
+        mostrarAlerta('Erro', 'Por favor, preencha todos os campos obrigatórios.', 'danger');
+        return;
+      }
+
+      // Validar e limpar nome da variável
+      const nomeVar = nome.toLowerCase().replace(/[^a-z0-9_]/g, '');
+      if (!nomeVar || !/^[a-z_][a-z0-9_]*$/.test(nomeVar)) {
+        mostrarAlerta('Erro', 'Nome da variável deve conter apenas letras, números e underscore, começando com letra ou underscore.', 'danger');
+        return;
+      }
+
+      // Verificar se já existe
+      if (state.variaveis.some(v => v.nome === nomeVar)) {
+        mostrarAlerta('Erro', `A variável "${nomeVar}" já existe.`, 'danger');
+        return;
+      }
+
+      // Adicionar variável
+      state.variaveis.push({ 
+        nome: nomeVar, 
+        label: label.trim(), 
+        tipo: tipo, 
+        obrigatorio: false 
+      });
+      
+      renderizarVariaveis();
+      renderizarTabela();
+      atualizarVariaveisDisponiveis();
+      salvarDados();
+
+      // Limpar form e fechar modal
+      el('#formVariavel').reset();
+      bootstrap.Modal.getInstance(el('#modalAdicionarVariavel')).hide();
+      
+      mostrarAlerta('Sucesso', `Variável "${label}" adicionada com sucesso!`, 'success');
+    }
+
+    function removerVariavel(index) {
+      const variavel = state.variaveis[index];
+      if (variavel.obrigatorio) {
+        mostrarAlerta('Erro', 'Não é possível remover variáveis obrigatórias.', 'warning');
+        return;
+      }
+
+      mostrarModalConfirmacao(
+        'Remover Variável', 
+        `Tem certeza que deseja remover a variável "${variavel.label}"?`, 
+        () => {
+          state.variaveis.splice(index, 1);
+          renderizarVariaveis();
+          renderizarTabela();
+          atualizarVariaveisDisponiveis();
+          salvarDados();
+          mostrarAlerta('Sucesso', `Variável "${variavel.label}" removida!`, 'success');
+        }
+      );
+    }
+
+    function renderizarVariaveis() {
+      const container = el('#listaVariaveis');
+      container.innerHTML = '';
+
+      state.variaveis.forEach((variavel, index) => {
+        const item = document.createElement('div');
+        item.className = 'variable-item d-flex justify-content-between align-items-start';
+        item.innerHTML = `
+          <div class="flex-grow-1">
+            <div class="variable-name">${variavel.label}</div>
+            <div class="small text-muted">{{${variavel.nome}}} • ${variavel.tipo}${variavel.obrigatorio ? ' • obrigatório' : ''}</div>
+          </div>
+          <div>
+            ${!variavel.obrigatorio ? 
+              `<button class="btn btn-sm btn-outline-danger" onclick="removerVariavel(${index})">
+                <i class="bi bi-trash"></i>
+              </button>` : 
+              '<span class="badge bg-secondary">Obrigatório</span>'
+            }
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function atualizarVariaveisDisponiveis() {
+      const container = el('#variaveisDisponiveis');
+      const variaveis = state.variaveis.map(v => `<code>{{${v.nome}}}</code>`).join(', ');
+      container.innerHTML = `<strong>Variáveis disponíveis:</strong> ${variaveis}`;
+    }
+
+    // ===== Gerenciamento de Tabela =====
+    function renderizarTabela() {
+      const header = el('#tableHeader');
+      header.innerHTML = '';
+
+      // Cabeçalhos das colunas
+      state.variaveis.forEach(variavel => {
+        const th = document.createElement('th');
+        th.style.minWidth = '150px';
+        th.innerHTML = `
+          <div class="d-flex align-items-center gap-1">
+            <span>${variavel.label}</span>
+            ${variavel.obrigatorio ? '<i class="bi bi-asterisk text-danger small"></i>' : ''}
+          </div>
+        `;
+        header.appendChild(th);
+      });
+
+      // Coluna de ações
+      const actionsHeader = document.createElement('th');
+      actionsHeader.style.minWidth = '120px';
+      actionsHeader.innerHTML = '<i class="bi bi-gear"></i> Ações';
+      header.appendChild(actionsHeader);
+
+      // Limpar linhas existentes
+      els('#tbl tbody tr').forEach(tr => tr.remove());
+    }
+
+    function addRow(dados = {}) {
+      const tbody = el('#tbl tbody');
+      const tr = document.createElement('tr');
+
+      // Campos das variáveis
+      state.variaveis.forEach(variavel => {
+        const td = document.createElement('td');
+        td.setAttribute('data-label', variavel.label);
+        
+        const input = document.createElement('input');
+        input.type = variavel.tipo;
+        input.className = 'form-control form-control-sm';
+        input.value = dados[variavel.nome] || '';
+        input.placeholder = variavel.label;
+        input.addEventListener('input', () => {
+          clearTimeout(window.autoSaveTimeout);
+          window.autoSaveTimeout = setTimeout(salvarDados, 1000);
+        });
+        
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+
+      // Coluna de ações
+      const actionsTd = document.createElement('td');
+      actionsTd.setAttribute('data-label', 'Ações');
+      actionsTd.innerHTML = `
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-secondary" data-act="dup" title="Duplicar">
+            <i class="bi bi-copy"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger" data-act="del" title="Excluir">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      `;
+      tr.appendChild(actionsTd);
+
+      tbody.appendChild(tr);
+
+      // Event listeners para ações
+      tr.addEventListener('click', (ev) => {
+        const act = ev.target.closest('[data-act]')?.dataset?.act;
+        if (!act) return;
+        
+        if (act === 'del') {
+          tr.remove();
+          salvarDados();
+        }
+        
+        if (act === 'dup') {
+          const inputs = els('input', tr);
+          const dadosDuplicados = {};
+          inputs.forEach((input, index) => {
+            dadosDuplicados[state.variaveis[index].nome] = input.value;
+          });
+          addRow(dadosDuplicados);
+          salvarDados();
+        }
+      });
+    }
+
+    function lerTabela() {
+      const rows = els('#tbl tbody tr');
+      const registros = [];
+
+      rows.forEach(tr => {
+        const inputs = els('input', tr);
+        const registro = {};
+        let temDados = false;
+
+        inputs.forEach((input, index) => {
+          const variavel = state.variaveis[index];
+          registro[variavel.nome] = input.value.trim();
+          if (input.value.trim()) temDados = true;
+        });
+
+        if (temDados) registros.push(registro);
+      });
+
+      return registros;
+    }
+
+    // ===== Utilitários =====
+    function normalizarTelefone(raw) {
+      if (!raw) return '';
+      let digits = ('' + raw).replace(/\D/g, '');
+      if (digits.length >= 3 && digits[0] === '0') digits = digits.slice(1);
+      if (digits.startsWith('55')) return digits;
+      if (digits.length >= 10 && digits.length <= 11) return '55' + digits;
+      return digits;
+    }
+
+    function formatBRL(v) {
+      const n = Number(v || 0);
+      return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function primeiroNome(nome) {
+      if (!nome) return '';
+      return ('' + nome).trim().split(/\s+/)[0];
+    }
+
+    function renderTemplate(tpl, ctx) {
+      let out = tpl;
+      // Substituir variáveis
+      out = out.replace(/\{\{(.*?)\}\}/g, (_, key) => {
+        const k = key.trim();
+        let valor = ctx[k] ?? '';
+        
+        // Formatação especial para valores monetários
+        if (k.includes('valor') || k.includes('preco') || k.includes('cashback') || k.includes('dinheiro')) {
+          if (valor && !isNaN(valor)) {
+            valor = formatBRL(valor);
+          }
+        }
+        
+        return valor;
+      });
+      return out;
+    }
+
+    function setDefaultTemplate() {
+      const tpl = `Olá {{nome}}! 👋
+
+Esta é uma mensagem personalizada da {{campanha}}.
+
+Para mais informações, entre em contato conosco pelo WhatsApp!`;
+      el('#template').value = tpl;
+    }
+
+    // ===== Geração de Mensagens =====
+    function gerar() {
+      const nomeCampanha = el('#nomeCampanha').value.trim();
+      const campoTelefone = el('#campoTelefone').value;
+      const tpl = el('#template').value.trim();
+      const registros = lerTabela();
+      const lista = el('#lista');
+      
+      lista.innerHTML = '';
+
+      if (!tpl) {
+        alert('Defina um template de mensagem.');
+        return;
+      }
+
+      if (registros.length === 0) {
+        alert('Adicione pelo menos um registro.');
+        return;
+      }
+
+      registros.forEach((registro, idx) => {
+        const telIntl = normalizarTelefone(registro[campoTelefone]);
+        
+        const ctx = {
+          ...registro,
+          campanha: nomeCampanha,
+          primeiro_nome: primeiroNome(registro.nome || ''),
+          telefone: telIntl
+        };
+
+        const msg = renderTemplate(tpl, ctx);
+        const qs = new URLSearchParams({ text: msg.normalize('NFC') }).toString();
+        const url = `https://wa.me/${telIntl}?${qs}`;
+
+        const item = document.createElement('div');
+        item.className = 'message-item';
+        
+        // Mostrar principais variáveis
+        const varInfo = state.variaveis
+          .filter(v => v.nome !== campoTelefone)
+          .slice(0, 3)
+          .map(v => `${v.label}: <strong>${registro[v.nome] || '-'}</strong>`)
+          .join(' • ');
+
+        item.innerHTML = `
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="flex-grow-1">
+              <h6 class="mb-1">${registro.nome || registro[state.variaveis[0]?.nome] || 'Registro #' + (idx + 1)}</h6>
+              <div class="small text-muted">
+                ${telIntl ? 
+                  `<i class="bi bi-telephone text-success"></i> +${telIntl}` : 
+                  '<i class="bi bi-exclamation-triangle text-danger"></i> Telefone inválido'
+                }
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <a class="btn btn-success btn-sm" target="_blank" rel="noopener" href="${url}">
+                <i class="bi bi-whatsapp me-1"></i>WhatsApp
+              </a>
+              <button class="btn btn-outline-secondary btn-sm copy-msg" data-idx="${idx}">
+                <i class="bi bi-clipboard me-1"></i>Copiar
+              </button>
+            </div>
+          </div>
+          <div class="small text-muted mb-2">${varInfo}</div>
+          <div class="preview small">${msg.replace(/</g, '&lt;')}</div>
+        `;
+        
+        item.dataset.text = msg;
+        lista.appendChild(item);
+      });
+    }
+
+    // ===== Import JSON/CSV =====
+    function importarJSON(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          
+          // Verificar se é um array de objetos (dados diretos)
+          if (Array.isArray(data)) {
+            processarDadosImportados(data);
+            return;
+          }
+          
+          // Verificar se tem dados de configuração completa
+          if (data.variaveis && data.registros) {
+            const confirmar = confirm('Este arquivo contém configurações completas. Deseja substituir suas configurações atuais?');
+            if (confirmar) {
+              state.variaveis = data.variaveis;
+              el('#nomeCampanha').value = data.nomeCampanha || '';
+              el('#campoTelefone').value = data.campoTelefone || 'telefone';
+              el('#template').value = data.template || '';
+              
+              renderizarVariaveis();
+              renderizarTabela();
+              atualizarVariaveisDisponiveis();
+              
+              els('#tbl tbody tr').forEach(tr => tr.remove());
+              data.registros.forEach(addRow);
+            }
+            return;
+          }
+          
+          // Se for um objeto, tentar extrair dados
+          if (typeof data === 'object') {
+            // Converter objeto em array
+            const arrayData = Object.keys(data).map(key => ({
+              nome: key,
+              ...data[key]
+            }));
+            processarDadosImportados(arrayData);
+            return;
+          }
+          
+          alert('Formato de arquivo JSON não reconhecido.');
+          
+        } catch (e) {
+          alert('Erro ao ler arquivo JSON. Verifique se o formato está correto.');
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    function processarDadosImportados(dados) {
+      if (!Array.isArray(dados) || dados.length === 0) {
+        alert('Nenhum dado válido encontrado no arquivo.');
+        return;
+      }
+      
+      // Extrair colunas do primeiro objeto
+      const primeiroItem = dados[0];
+      const colunas = Object.keys(primeiroItem);
+      
+      // Verificar se precisa adicionar novas variáveis
+      const novasVariaveis = colunas.filter(col => 
+        !state.variaveis.find(v => v.nome === col.toLowerCase())
+      );
+
+      if (novasVariaveis.length > 0) {
+        const adicionar = confirm(
+          `Detectadas novas variáveis: ${novasVariaveis.join(', ')}. Deseja adicioná-las?`
+        );
+        
+        if (adicionar) {
+          novasVariaveis.forEach(nomeVar => {
+            // Tentar detectar o tipo baseado no valor
+            const valorExemplo = primeiroItem[nomeVar];
+            let tipo = 'text';
+            
+            if (!isNaN(valorExemplo) && valorExemplo !== '') {
+              tipo = 'number';
+            } else if (valorExemplo && typeof valorExemplo === 'string' && valorExemplo.match(/^\d{4}-\d{2}-\d{2}$/)) {
+              tipo = 'date';
+            }
+            
+            state.variaveis.push({
+              nome: nomeVar.toLowerCase(),
+              label: nomeVar,
+              tipo: tipo,
+              obrigatorio: false
+            });
+          });
+          
+          renderizarVariaveis();
+          renderizarTabela();
+          atualizarVariaveisDisponiveis();
+        }
+      }
+
+      // Importar dados
+      dados.forEach(item => {
+        const dadosLinha = {};
+        colunas.forEach(coluna => {
+          dadosLinha[coluna.toLowerCase()] = item[coluna] || '';
+        });
+        addRow(dadosLinha);
+      });
+
+      salvarDados();
+      alert(`${dados.length} registros importados com sucesso!`);
+    }
+    function importarCSV(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = reader.result;
+        const linhas = ('' + text).split(/\r?\n/).filter(l => l.trim().length);
+        
+        if (linhas.length === 0) return;
+
+        // Primeira linha como cabeçalho
+        const cabecalho = linhas[0].split(',').map(h => h.trim());
+        
+        // Verificar se precisa ajustar variáveis
+        const novasVariaveis = cabecalho.filter(h => 
+          !state.variaveis.find(v => v.nome === h.toLowerCase())
+        );
+
+        if (novasVariaveis.length > 0) {
+          const adicionar = confirm(
+            `Detectadas novas variáveis: ${novasVariaveis.join(', ')}. Deseja adicioná-las?`
+          );
+          
+          if (adicionar) {
+            novasVariaveis.forEach(nomeVar => {
+              state.variaveis.push({
+                nome: nomeVar.toLowerCase(),
+                label: nomeVar,
+                tipo: 'text',
+                obrigatorio: false
+              });
+            });
+            renderizarVariaveis();
+            renderizarTabela();
+            atualizarVariaveisDisponiveis();
+          }
+        }
+
+        // Importar dados
+        for (let i = 1; i < linhas.length; i++) {
+          const valores = linhas[i].split(',').map(v => v.trim());
+          const dadosLinha = {};
+          
+          cabecalho.forEach((coluna, index) => {
+            dadosLinha[coluna.toLowerCase()] = valores[index] || '';
+          });
+          
+          addRow(dadosLinha);
+        }
+
+        salvarDados();
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    function carregarExemplo() {
+      // Limpar tabela
+      els('#tbl tbody tr').forEach(tr => tr.remove());
+      
+      // Configurar variáveis exemplo
+      state.variaveis = [
+        { nome: 'nome', label: 'Nome completo', tipo: 'text', obrigatorio: true },
+        { nome: 'telefone', label: 'Telefone', tipo: 'text', obrigatorio: true },
+        { nome: 'produto', label: 'Produto', tipo: 'text', obrigatorio: false },
+        { nome: 'valor', label: 'Valor', tipo: 'number', obrigatorio: false }
+      ];
+
+      renderizarVariaveis();
+      renderizarTabela();
+      atualizarVariaveisDisponiveis();
+
+      // Dados exemplo
+      const exemplos = [
+        { nome: 'Ana Souza', telefone: '(92) 9 8888-1111', produto: 'Produto A', valor: 35.50 },
+        { nome: 'Bruno Lima', telefone: '92 99999-2222', produto: 'Produto B', valor: 120 },
+        { nome: 'Carla Mendes', telefone: '(11) 9 7654-3333', produto: 'Produto C', valor: 80.90 }
+      ];
+
+      exemplos.forEach(addRow);
+
+      // Template exemplo
+      el('#template').value = `Olá {{nome}}! 👋
+
+Seu pedido do {{produto}} no valor de {{valor}} foi processado com sucesso!
+
+Entre em contato pelo WhatsApp para mais detalhes.`;
+
+      el('#nomeCampanha').value = 'Minha Loja Online';
+
+      salvarDados();
+    }
+
+    // ===== Funções Utilitárias =====
+    function mostrarAlerta(titulo, mensagem, tipo = 'info') {
+      // Criar toast para feedback
+      const toastContainer = el('#toastContainer') || (() => {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '1100';
+        document.body.appendChild(container);
+        return container;
+      })();
+
+      const toast = document.createElement('div');
+      toast.className = 'toast align-items-center text-bg-' + tipo + ' border-0';
+      toast.setAttribute('role', 'alert');
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">
+            <strong>${titulo}:</strong> ${mensagem}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      `;
+      
+      toastContainer.appendChild(toast);
+      const bsToast = new bootstrap.Toast(toast);
+      bsToast.show();
+      
+      toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
+    function mostrarModalConfirmacao(titulo, mensagem, callback) {
+      el('#modalConfirmarTitulo').textContent = titulo;
+      el('#modalConfirmarTexto').innerHTML = `<p>${mensagem}</p>`;
+      
+      const btnConfirmar = el('#btnConfirmarAcao');
+      btnConfirmar.textContent = 'Confirmar';
+      btnConfirmar.className = 'btn btn-danger';
+      
+      const modal = new bootstrap.Modal(el('#modalConfirmar'));
+      modal.show();
+      
+      btnConfirmar.onclick = () => {
+        modal.hide();
+        callback();
+      };
+    }
+
+    function mostrarModalInput(titulo, mensagem, callback) {
+      el('#modalConfirmarTitulo').textContent = titulo;
+      el('#modalConfirmarTexto').innerHTML = `
+        <p>${mensagem}</p>
+        <input type="text" class="form-control" id="inputTempModal" placeholder="Digite aqui...">
+      `;
+      
+      const btnConfirmar = el('#btnConfirmarAcao');
+      btnConfirmar.textContent = 'Salvar';
+      btnConfirmar.className = 'btn btn-primary';
+      
+      const modal = new bootstrap.Modal(el('#modalConfirmar'));
+      modal.show();
+      
+      // Focar no input quando modal abrir
+      el('#modalConfirmar').addEventListener('shown.bs.modal', () => {
+        el('#inputTempModal').focus();
+      }, { once: true });
+      
+      // Configurar callback
+      btnConfirmar.onclick = () => {
+        const valor = el('#inputTempModal').value;
+        modal.hide();
+        callback(valor);
+      };
+    }
+
+    // ===== Gerenciamento de Clientes =====
+    function salvarListaClientes() {
+      const registros = lerTabela();
+      if (registros.length === 0) {
+        mostrarAlerta('Aviso', 'Não há registros para salvar.', 'warning');
+        return;
+      }
+
+      mostrarModalInput('Salvar Lista de Clientes', 'Digite um nome para esta lista:', (nome) => {
+        if (!nome.trim()) return;
+        
+        const listas = JSON.parse(localStorage.getItem('message-generator-clientes') || '{}');
+        listas[nome.trim()] = {
+          registros: registros,
+          variaveis: state.variaveis,
+          timestamp: new Date().toISOString()
+        };
+        
+        localStorage.setItem('message-generator-clientes', JSON.stringify(listas));
+        atualizarListaClientesSalvos();
+        mostrarAlerta('Sucesso', `Lista "${nome.trim()}" salva com sucesso!`, 'success');
+      });
+    }
+
+    function atualizarListaClientesSalvos() {
+      const listas = JSON.parse(localStorage.getItem('message-generator-clientes') || '{}');
+      const container = el('#listaClientesSalvos');
+      container.innerHTML = '';
+
+      const nomes = Object.keys(listas).sort();
+      if (nomes.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted p-3"><i class="bi bi-inbox"></i><br>Nenhuma lista de clientes salva</div>';
+        return;
+      }
+
+      nomes.forEach(nome => {
+        const lista = listas[nome];
+        const div = document.createElement('div');
+        div.className = 'border rounded p-3 mb-2';
+        div.style.background = 'var(--input-bg)';
+        div.innerHTML = `
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="mb-1">${nome}</h6>
+              <small class="text-muted">${lista.registros.length} registros • ${new Date(lista.timestamp).toLocaleDateString('pt-BR')}</small>
+            </div>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-primary" onclick="carregarListaClientes('${nome}')" title="Carregar lista">
+                <i class="bi bi-arrow-down-circle"></i>
+              </button>
+              <button class="btn btn-outline-danger" onclick="excluirListaClientes('${nome}')" title="Excluir lista">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function carregarListaClientes(nome) {
+      const listas = JSON.parse(localStorage.getItem('message-generator-clientes') || '{}');
+      const lista = listas[nome];
+      
+      if (!lista) {
+        mostrarAlerta('Erro', 'Lista não encontrada.', 'danger');
+        return;
+      }
+
+      // Limpar tabela atual
+      els('#tbl tbody tr').forEach(tr => tr.remove());
+      
+      // Carregar variáveis da lista
+      state.variaveis = lista.variaveis;
+      renderizarVariaveis();
+      renderizarTabela();
+      
+      // Carregar registros
+      lista.registros.forEach(addRow);
+      
+      atualizarVariaveisDisponiveis();
+      salvarDados();
+      
+      // Fechar modal
+      bootstrap.Modal.getInstance(el('#modalGerenciarDados')).hide();
+      
+      mostrarAlerta('Sucesso', `Lista "${nome}" carregada com sucesso!`, 'success');
+    }
+
+    function excluirListaClientes(nome) {
+      mostrarModalConfirmacao('Excluir Lista', `Tem certeza que deseja excluir a lista "${nome}"?`, () => {
+        const listas = JSON.parse(localStorage.getItem('message-generator-clientes') || '{}');
+        delete listas[nome];
+        localStorage.setItem('message-generator-clientes', JSON.stringify(listas));
+        atualizarListaClientesSalvos();
+        mostrarAlerta('Sucesso', `Lista "${nome}" excluída com sucesso!`, 'success');
+      });
+    }
+
+    function resetarDados() {
+      mostrarModalConfirmacao('Resetar Todos os Dados', 
+        'Esta ação irá remover TODOS os dados salvos (configurações, listas de clientes, auto-save). Deseja continuar?', 
+        () => {
+          localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem(AUTOSAVE_KEY);
+          localStorage.removeItem('message-generator-clientes');
+          localStorage.removeItem('app-theme');
+          
+          // Resetar para estado inicial
+          state.variaveis = [
+            { nome: 'nome', label: 'Nome completo', tipo: 'text', obrigatorio: true },
+            { nome: 'telefone', label: 'Telefone', tipo: 'text', obrigatorio: true }
+          ];
+          state.registros = [];
+          
+          el('#nomeCampanha').value = '';
+          el('#campoTelefone').value = 'telefone';
+          el('#template').value = '';
+          
+          els('#tbl tbody tr').forEach(tr => tr.remove());
+          el('#lista').innerHTML = '';
+          
+          renderizarVariaveis();
+          renderizarTabela();
+          addRow({});
+          atualizarVariaveisDisponiveis();
+          atualizarListaConfiguracoes();
+          atualizarListaClientesSalvos();
+          
+          // Reinicializar tema
+          initTheme();
+          
+          mostrarAlerta('Sucesso', 'Todos os dados foram resetados!', 'success');
+        }
+      );
+    }
+
+    function confirmarSalvarConfiguracao() {
+      const nome = el('#nomeConfig').value.trim();
+      if (!nome) {
+        mostrarAlerta('Erro', 'Por favor, digite um nome para a configuração.', 'danger');
+        return;
+      }
+
+      salvarDados(nome);
+      el('#formSalvarConfig').reset();
+      bootstrap.Modal.getInstance(el('#modalSalvarConfig')).hide();
+    }
+
+    // ===== Event Listeners =====
+    document.addEventListener('click', (ev) => {
+      if (ev.target.id === 'themeToggle' || ev.target.closest('#themeToggle')) {
+        toggleTheme();
+      }
+      if (ev.target.id === 'btnAdicionarVariavel') adicionarVariavel();
+      if (ev.target.id === 'btnConfirmarVariavel') confirmarAdicionarVariavel();
+      if (ev.target.id === 'btnConfirmarSalvarConfig') confirmarSalvarConfiguracao();
+      if (ev.target.id === 'btnSalvarClientes') salvarListaClientes();
+      if (ev.target.id === 'btnNovaLinha') addRow({});
+      if (ev.target.id === 'btnGerar') gerar();
+      if (ev.target.id === 'btnCarregarExemplo') carregarExemplo();
+      if (ev.target.id === 'btnLimpar') {
+        mostrarModalConfirmacao('Limpar Lista', 'Tem certeza que deseja limpar toda a lista de registros?', () => {
+          els('#tbl tbody tr').forEach(tr => tr.remove());
+          el('#lista').innerHTML = '';
+          addRow({});
+          salvarDados();
+          mostrarAlerta('Sucesso', 'Lista limpa com sucesso!', 'success');
+        });
+      }
+      if (ev.target.classList.contains('copy-msg')) {
+        const idx = Number(ev.target.dataset.idx);
+        const text = el('#lista').children[idx]?.dataset?.text || '';
+        if (!text) {
+          mostrarAlerta('Aviso', 'Nada para copiar.', 'warning');
+          return;
+        }
+        navigator.clipboard.writeText(text).then(() => {
+          const icon = ev.target.querySelector('i');
+          const originalClass = icon.className;
+          icon.className = 'bi bi-check me-1';
+          ev.target.classList.add('btn-success');
+          ev.target.classList.remove('btn-outline-secondary');
+          
+          setTimeout(() => {
+            icon.className = originalClass;
+            ev.target.classList.remove('btn-success');
+            ev.target.classList.add('btn-outline-secondary');
+          }, 1200);
+          
+          mostrarAlerta('Sucesso', 'Mensagem copiada!', 'success');
+        });
+      }
+    });
+
+    // Event listeners para importação
+    el('#csv').addEventListener('change', (ev) => {
+      const file = ev.target.files?.[0];
+      if (file) importarCSV(file);
+      ev.target.value = '';
+    });
+
+    el('#jsonImport').addEventListener('change', (ev) => {
+      const file = ev.target.files?.[0];
+      if (file) importarJSON(file);
+      ev.target.value = '';
+    });
+
+    el('#backupFile').addEventListener('change', (ev) => {
+      const file = ev.target.files?.[0];
+      if (file) importarDados(file);
+      ev.target.value = '';
+    });
+
+    el('#importarTudo').addEventListener('change', (ev) => {
+      const file = ev.target.files?.[0];
+      if (file) importarDados(file);
+      ev.target.value = '';
+    });
+
+    // Auto-save setup
+    function setupAutoSave() {
+      const inputs = ['#nomeCampanha', '#campoTelefone', '#template'];
+      inputs.forEach(sel => {
+        el(sel).addEventListener('input', () => {
+          clearTimeout(window.autoSaveTimeout);
+          window.autoSaveTimeout = setTimeout(salvarDados, 1000);
+        });
+      });
+    }
+
+    // ===== Inicialização =====
+    function inicializar() {
+      initTheme();
+      initConfigDropdown();
+      renderizarVariaveis();
+      renderizarTabela();
+      atualizarVariaveisDisponiveis();
+      setupAutoSave();
+      atualizarListaConfiguracoes();
+      atualizarListaClientesSalvos();
+      
+      // Carregar auto-save se existir
+      const autosaveData = localStorage.getItem(AUTOSAVE_KEY);
+      if (autosaveData) {
+        carregarDados();
+      } else {
+        setDefaultTemplate();
+        addRow({});
+      }
+    }
+
+    // Inicializar quando página carregar
+    document.addEventListener('DOMContentLoaded', inicializar);
+  </script>
+</body>
+</html>
