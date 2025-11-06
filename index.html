@@ -13,8 +13,42 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <!-- Custom autocomplete styling -->
+
   
   <style>
+    /* Estilos base responsivos */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+    
+    html {
+      touch-action: manipulation; /* Melhora performance em touch */
+    }
+    
+    /* Scrollbars customizadas para mobile */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 4px;
+      opacity: 0.7;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      opacity: 1;
+    }
+
+    /* Variáveis CSS para temas */
     :root{
       --bg:#0f172a; --panel:#111827; --muted:#94a3b8; --text:#e5e7eb; --accent:#22c55e; --accent-2:#16a34a; --red:#ef4444; --blue:#3b82f6;
       --border:#1f2937; --input-bg:#0b1220; --input-border:#243244;
@@ -99,6 +133,109 @@
     /* Preview customizado */
     .preview{white-space:pre-wrap; background:var(--input-bg); border:1px solid var(--input-border); padding:10px; border-radius:10px; min-height:120px; color:var(--text-primary);}
     
+    /* Template preview styling */
+    .template-preview {
+      background: var(--input-bg);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 15px;
+      min-height: 80px;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.5;
+      position: relative;
+    }
+    
+    .template-preview::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      right: -1px;
+      bottom: -1px;
+      background: linear-gradient(45deg, var(--accent), var(--accent-2));
+      border-radius: 12px;
+      z-index: -1;
+      opacity: 0.1;
+    }
+    
+    /* Variable highlighting in preview */
+    .preview-variable {
+      background: var(--accent);
+      color: #04210e;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      display: inline-block;
+      margin: 0 1px;
+    }
+    
+    .preview-invalid-variable {
+      background: var(--red);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      display: inline-block;
+      margin: 0 1px;
+      text-decoration: line-through;
+    }
+    
+    /* Template textarea highlighting overlay */
+    .template-highlight-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 1;
+      font-family: inherit;
+      font-size: inherit;
+      line-height: inherit;
+      padding: inherit;
+      border: 1px solid transparent;
+      overflow: hidden;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: transparent;
+      background: transparent;
+    }
+    
+    .template-input-container {
+      position: relative;
+    }
+    
+    .template-input-container textarea {
+      position: relative;
+      z-index: 2;
+      background: transparent;
+      color: var(--text-primary);
+    }
+    
+    .template-input-container .template-highlight-overlay {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    
+    .highlight-variable {
+      background: rgba(34, 197, 94, 0.3);
+      color: transparent;
+      border-radius: 3px;
+      padding: 0 2px;
+    }
+    
+    .highlight-invalid {
+      background: rgba(239, 68, 68, 0.3);
+      color: transparent;
+      border-radius: 3px;
+      padding: 0 2px;
+    }
+    
     /* Variáveis dinâmicas */
     .variable-item{background:var(--input-bg); border:1px solid var(--input-border); border-radius:8px; padding:12px; margin-bottom:8px}
     .variable-name{font-weight:600; color:var(--text-primary)}
@@ -142,8 +279,102 @@
     /* Responsividade adicional */
     @media(max-width:768px){
       .container-fluid{padding:16px 12px}
-      .theme-switcher{top:10px; right:10px;}
-      .config-dropdown{position:fixed; top:auto; bottom:0; left:0; right:0; max-height:50vh; border-radius:12px 12px 0 0;}
+      .theme-switcher{top:10px; right:10px; z-index: 1001;}
+      .config-dropdown{position:fixed; top:auto; bottom:0; left:0; right:0; max-height:50vh; border-radius:12px 12px 0 0; z-index: 1002;}
+      
+      /* Melhorar inputs em mobile */
+      .form-control, textarea {
+        font-size: 16px !important; /* Evita zoom no iOS */
+        padding: 12px 16px;
+        border-radius: 8px;
+      }
+      
+      /* Botões maiores para touch */
+      .btn {
+        padding: 12px 20px;
+        font-size: 16px;
+        min-height: 48px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      /* Cards mais espaçados */
+      .card {
+        margin-bottom: 20px;
+      }
+      
+      /* Preview responsivo */
+      .template-preview {
+        font-size: 14px;
+        padding: 16px;
+        max-height: 40vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      /* Tabelas responsivas */
+      .table-responsive {
+        font-size: 14px;
+      }
+      
+      /* Melhor espaçamento para listas */
+      .list-group-item {
+        padding: 16px;
+        font-size: 16px;
+      }
+    }
+
+    /* Custom autocomplete menu customization */
+    .custom-autocomplete-menu { 
+      background: var(--bg-secondary); 
+      color: var(--text-primary); 
+      border: 2px solid var(--accent);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    .autocomplete-item { 
+      padding: 16px 20px; 
+      transition: all 0.2s ease;
+      border-bottom: 1px solid var(--border);
+      min-height: 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .autocomplete-item:last-of-type {
+      border-bottom: none;
+    }
+    .autocomplete-item.selected, .autocomplete-item:hover, .autocomplete-item:active { 
+      background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important;
+      color: #ffffff !important;
+      transform: translateX(4px);
+      box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+      font-weight: 600 !important;
+    }
+    .autocomplete-item.selected *, .autocomplete-item:hover *, .autocomplete-item:active * {
+      color: #ffffff !important;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .autocomplete-item .small { 
+      color: var(--text-muted); 
+      font-family: 'Courier New', monospace;
+    }
+    
+    /* Mobile responsivo */
+    @media (max-width: 768px) {
+      .custom-autocomplete-menu {
+        min-width: min(300px, 90vw) !important;
+        max-width: 95vw !important;
+        max-height: min(300px, 50vh) !important;
+        font-size: 16px; /* Evita zoom no iOS */
+      }
+      .autocomplete-item {
+        padding: 18px 22px !important;
+        min-height: 70px !important;
+      }
     }
   </style>
 </head>
@@ -207,12 +438,20 @@
             <textarea id="template" class="form-control" rows="6" placeholder="Digite sua mensagem usando {{variavel}} para substituições..."></textarea>
             <small class="text-muted mt-1 d-block">Use <code>{{nome_da_variavel}}</code> para inserir valores. Variáveis disponíveis serão listadas automaticamente.</small>
             <div id="variaveisDisponiveis" class="mt-2 small text-muted"></div>
+            
+            <!-- Preview da mensagem -->
+            <div class="mt-3">
+              <label class="form-label small">📱 Preview da mensagem:</label>
+              <div id="templatePreview" class="template-preview">
+                <div class="text-muted small text-center p-3">Digite o template acima para ver a prévia aqui</div>
+              </div>
+            </div>
           </div>
 
           <!-- Botões de ação para template -->
           <div class="d-flex flex-wrap gap-2">
-            <button class="btn btn-primary" id="btnCarregarExemplo">
-              <i class="bi bi-file-earmark-plus me-1"></i>Carregar exemplo completo
+            <button class="btn btn-outline-secondary" id="btnCarregarExemplo">
+              <i class="bi bi-file-earmark-plus me-1"></i>Carregar exemplo
             </button>
             <button class="btn btn-outline-secondary" id="btnSalvarConfig">
               <i class="bi bi-bookmark me-1"></i>Salvar configuração
@@ -487,6 +726,7 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+
   <script>
     // Estado da aplicação
     const state = {
@@ -670,6 +910,8 @@
       // Aplicar máscaras após carregar dados
       setTimeout(() => {
         aplicarMascarasEmTodosOsTelefones();
+        // Atualizar preview após carregar dados
+        updateTemplatePreview();
       }, 100);
       
       if (nome) mostrarAlerta('Sucesso', `Configuração "${nome}" carregada com sucesso!`, 'success');
@@ -910,12 +1152,620 @@
         `;
         container.appendChild(item);
       });
+        // Agora usando autocomplete customizado
     }
 
     function atualizarVariaveisDisponiveis() {
       const container = el('#variaveisDisponiveis');
       const variaveis = state.variaveis.map(v => `<code>{{${v.nome}}}</code>`).join(', ');
       container.innerHTML = `<strong>Variáveis disponíveis:</strong> ${variaveis}`;
+      
+      // Atualizar preview quando variáveis mudam
+      updateTemplatePreview();
+      
+      // Atualizar highlighting quando variáveis mudam
+      const overlay = el('#templateHighlightOverlay');
+      if (overlay) {
+        const templateTextarea = el('#template');
+        if (templateTextarea) {
+          const highlightedText = highlightVariablesInText(templateTextarea.value);
+          overlay.innerHTML = highlightedText;
+        }
+      }
+    }
+
+    // ===== Autocomplete para variáveis =====
+    let customAutocompleteActive = false;
+    let debounceTimer = null;
+    
+    function initVariableAutocomplete() {
+      setupCustomAutocomplete();
+    }
+
+    function setupCustomAutocomplete() {
+      const textarea = el('#template');
+      if (!textarea) return;
+
+      let autocompleteContainer = null;
+      let currentSuggestions = [];
+      let selectedIndex = -1;
+
+      function showAutocomplete(suggestions, cursorPos) {
+        hideAutocomplete();
+        
+        if (suggestions.length === 0) return;
+        
+        autocompleteContainer = document.createElement('div');
+        autocompleteContainer.className = 'custom-autocomplete-menu';
+        autocompleteContainer.style.cssText = `
+          position: absolute;
+          background: var(--bg-secondary);
+          border: 2px solid var(--accent);
+          border-radius: 12px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
+          backdrop-filter: blur(10px);
+          z-index: 1000;
+          max-height: min(250px, 40vh);
+          overflow-y: auto;
+          min-width: min(280px, 90vw);
+          max-width: min(400px, 95vw);
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          opacity: 0;
+          transform: translateY(-10px) scale(0.95);
+          transition: all 0.2s ease;
+          -webkit-overflow-scrolling: touch;
+        `;
+        
+        // Calcular posição baseada no cursor
+        const textareaRect = textarea.getBoundingClientRect();
+        const textBeforeCursor = textarea.value.substring(0, cursorPos);
+        const lines = textBeforeCursor.split('\n');
+        const currentLine = lines.length;
+        const currentColumn = lines[lines.length - 1].length;
+        
+        // Aproximação da posição do cursor
+        const charWidth = 8; // pixels por caractere aproximadamente
+        const lineHeight = 24; // altura da linha aproximadamente
+        
+        // Posicionamento responsivo
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const isMobile = viewportWidth <= 768;
+        
+        let left, top;
+        
+        if (isMobile) {
+          // Em mobile, centralizar horizontalmente e posicionar abaixo do textarea
+          left = Math.max(10, (viewportWidth - 300) / 2);
+          top = textareaRect.bottom + 10;
+          
+          // Se não couber na tela, posicionar acima
+          if (top + 200 > viewportHeight) {
+            top = textareaRect.top - 210;
+          }
+        } else {
+          // Desktop: posição baseada no cursor
+          left = textareaRect.left + (currentColumn * charWidth) + 10;
+          top = textareaRect.top + (currentLine * lineHeight) + 25;
+          
+          // Ajustar se sair da tela
+          left = Math.min(left, viewportWidth - 320);
+          top = Math.min(top, viewportHeight - 200);
+        }
+        
+        autocompleteContainer.style.left = Math.max(10, left) + 'px';
+        autocompleteContainer.style.top = Math.max(10, top) + 'px';
+        
+        suggestions.forEach((suggestion, index) => {
+          const item = document.createElement('div');
+          item.className = 'autocomplete-item';
+          item.style.cssText = `
+            padding: 16px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            touch-action: manipulation;
+          `;
+          
+          item.innerHTML = `
+            <div style="font-weight: 600; color: var(--accent); font-size: 15px; margin-bottom: 6px; line-height: 1.2;">${suggestion.label}</div>
+            <div style="font-size: 13px; color: var(--text-muted); font-family: 'Courier New', monospace; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px; display: inline-block; line-height: 1.3;">{{${suggestion.key}}}</div>
+          `;
+          
+          item.addEventListener('click', () => selectSuggestion(suggestion));
+          item.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            selectSuggestion(suggestion);
+          });
+          item.addEventListener('mouseenter', () => {
+            selectedIndex = index;
+            updateSelection();
+          });
+          item.addEventListener('touchstart', () => {
+            selectedIndex = index;
+            updateSelection();
+          });
+          
+          item.addEventListener('mouseleave', () => {
+            // Adicionar efeito suave ao sair
+            if (index !== selectedIndex) {
+              item.style.transform = 'translateX(0)';
+            }
+          });
+          
+          autocompleteContainer.appendChild(item);
+        });
+        
+        // Adicionar um rodapé informativo
+        if (suggestions.length > 0) {
+          const footer = document.createElement('div');
+          footer.style.cssText = `
+            padding: 8px 16px;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            background: rgba(255,255,255,0.02);
+            text-align: center;
+          `;
+          footer.innerHTML = `↑↓ navegar • Enter selecionar • Esc fechar`;
+          autocompleteContainer.appendChild(footer);
+        }
+        
+        // Remover borda da última opção
+        const lastItem = autocompleteContainer.querySelector('.autocomplete-item:last-of-type');
+        if (lastItem) {
+          lastItem.style.borderBottom = 'none';
+        }
+        
+        document.body.appendChild(autocompleteContainer);
+        currentSuggestions = suggestions;
+        selectedIndex = 0;
+        customAutocompleteActive = true;
+        updateSelection();
+        
+        // Animar entrada
+        requestAnimationFrame(() => {
+          autocompleteContainer.style.opacity = '1';
+          autocompleteContainer.style.transform = 'translateY(0) scale(1)';
+        });
+      }
+
+      function hideAutocomplete() {
+        // Cancelar qualquer timer de debounce pendente
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+          debounceTimer = null;
+        }
+        
+        if (autocompleteContainer) {
+          autocompleteContainer.remove();
+          autocompleteContainer = null;
+          currentSuggestions = [];
+          selectedIndex = -1;
+          customAutocompleteActive = false;
+        }
+      }
+
+      function updateSelection() {
+        if (!autocompleteContainer) return;
+        
+        const items = autocompleteContainer.querySelectorAll('.autocomplete-item');
+        items.forEach((item, index) => {
+          if (index === selectedIndex) {
+            item.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
+            item.style.color = '#ffffff';
+            item.style.transform = 'translateX(4px)';
+            item.style.boxShadow = '0 4px 12px rgba(46, 204, 113, 0.4)';
+            item.style.fontWeight = '600';
+            
+            // Destacar o texto da variável selecionada com contraste alto
+            const labelDiv = item.querySelector('div:first-child');
+            const variableCode = item.querySelector('div:last-child');
+            if (labelDiv) {
+              labelDiv.style.color = '#ffffff';
+              labelDiv.style.textShadow = '0 1px 2px rgba(0,0,0,0.3)';
+            }
+            if (variableCode) {
+              variableCode.style.background = 'rgba(255,255,255,0.25)';
+              variableCode.style.color = '#ffffff';
+              variableCode.style.fontWeight = '700';
+              variableCode.style.textShadow = '0 1px 2px rgba(0,0,0,0.3)';
+            }
+            
+            // Scroll into view se necessário
+            item.scrollIntoView({ block: 'nearest' });
+          } else {
+            item.style.background = 'transparent';
+            item.style.color = 'var(--text-primary)';
+            item.style.transform = 'translateX(0)';
+            item.style.boxShadow = 'none';
+            item.style.fontWeight = '400';
+            
+            // Resetar estilo do código da variável
+            const labelDiv = item.querySelector('div:first-child');
+            const variableCode = item.querySelector('div:last-child');
+            if (labelDiv) {
+              labelDiv.style.color = 'var(--accent)';
+              labelDiv.style.textShadow = 'none';
+            }
+            if (variableCode) {
+              variableCode.style.background = 'rgba(255,255,255,0.05)';
+              variableCode.style.color = 'var(--text-muted)';
+              variableCode.style.fontWeight = '400';
+              variableCode.style.textShadow = 'none';
+            }
+          }
+        });
+      }
+
+      function selectSuggestion(suggestion) {
+        // Cancelar qualquer timer de debounce pendente
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+          debounceTimer = null;
+        }
+        
+        const cursorPos = textarea.selectionStart;
+        const text = textarea.value;
+        
+        // Encontrar o início da variável atual (procurar por {{)
+        let start = cursorPos;
+        let foundOpenBrace = false;
+        
+        // Procurar {{ antes do cursor
+        while (start >= 2) {
+          if (text.substring(start - 2, start) === '{{') {
+            foundOpenBrace = true;
+            break;
+          }
+          start--;
+        }
+        
+        if (foundOpenBrace) {
+          // Substituir o conteúdo entre {{ e cursor com a variável selecionada
+          const before = text.substring(0, start);
+          const after = text.substring(cursorPos);
+          const newText = before + suggestion.key + '}}' + after;
+          
+          textarea.value = newText;
+          const newCursorPos = start + suggestion.key.length + 2;
+          textarea.setSelectionRange(newCursorPos, newCursorPos);
+          
+          // Disparar eventos
+          textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        
+        hideAutocomplete();
+        textarea.focus();
+      }
+
+      function checkForAutocomplete() {
+        const cursorPos = textarea.selectionStart;
+        const text = textarea.value;
+        
+        // Encontrar o contexto atual - buscar {{ mais próximo antes do cursor
+        let variableStart = -1;
+        let searchText = '';
+        
+        // Buscar {{ trabalhando backwards do cursor
+        for (let i = cursorPos - 1; i >= 1; i--) {
+          if (text.substring(i - 1, i + 1) === '{{') {
+            variableStart = i + 1; // Posição após {{
+            searchText = text.substring(i + 1, cursorPos);
+            break;
+          }
+          // Se encontrar }} antes de {{, não estamos em uma variável
+          if (text.substring(i - 1, i + 1) === '}}') {
+            break;
+          }
+        }
+        
+        // Se encontrou {{ e não há }} no texto de busca
+        if (variableStart >= 0 && !searchText.includes('}}')) {
+          // Filtrar sugestões
+          const allSuggestions = [
+            { key: 'campanha', label: 'Nome da Campanha' },
+            ...state.variaveis.map(v => ({ key: v.nome, label: v.label }))
+          ];
+          
+          const filteredSuggestions = allSuggestions.filter(suggestion => {
+            const matchesKey = suggestion.key.toLowerCase().includes(searchText.toLowerCase());
+            const matchesLabel = suggestion.label.toLowerCase().includes(searchText.toLowerCase());
+            return matchesKey || matchesLabel;
+          });
+          
+          if (filteredSuggestions.length > 0) {
+            showAutocomplete(filteredSuggestions, cursorPos);
+          } else {
+            hideAutocomplete();
+          }
+        } else {
+          hideAutocomplete();
+        }
+      }
+
+      function debouncedCheckAutocomplete(immediate = false) {
+        // Cancelar timer anterior se existir
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+        }
+        
+        if (immediate) {
+          // Executar imediatamente
+          checkForAutocomplete();
+        } else {
+          // Executar após delay
+          debounceTimer = setTimeout(() => {
+            checkForAutocomplete();
+            debounceTimer = null;
+          }, 100); // Reduzindo para 100ms para melhor responsividade
+        }
+      }
+
+      // Event listeners
+      textarea.addEventListener('input', (e) => {
+        debouncedCheckAutocomplete(false);
+      });
+      
+      textarea.addEventListener('keydown', (e) => {
+        if (!customAutocompleteActive) {
+          // Se não está ativo, verificar com debounce para todos os casos
+          if (e.key.length === 1 || e.key === 'Backspace') {
+            debouncedCheckAutocomplete(false);
+          }
+          return;
+        }
+        
+        // Controlar navegação no autocomplete quando está ativo
+        switch (e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            selectedIndex = Math.min(selectedIndex + 1, currentSuggestions.length - 1);
+            updateSelection();
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            selectedIndex = Math.max(selectedIndex - 1, 0);
+            updateSelection();
+            break;
+          case 'Enter':
+          case 'Tab':
+            e.preventDefault();
+            if (selectedIndex >= 0 && currentSuggestions[selectedIndex]) {
+              selectSuggestion(currentSuggestions[selectedIndex]);
+            }
+            break;
+          case 'Escape':
+            e.preventDefault();
+            hideAutocomplete();
+            break;
+          default:
+            // Para outras teclas quando autocomplete está ativo, verificar contexto
+            if (e.key.length === 1 || e.key === 'Backspace') {
+              // Permitir que a tecla seja processada primeiro, depois verificar
+              setTimeout(() => debouncedCheckAutocomplete(false), 10);
+            }
+        }
+      });
+
+      // Fechar ao clicar fora
+      document.addEventListener('click', (e) => {
+        if (!textarea.contains(e.target) && !autocompleteContainer?.contains(e.target)) {
+          hideAutocomplete();
+        }
+      });
+      
+      // Fechar ao redimensionar tela (mobile orientation change)
+      window.addEventListener('resize', () => {
+        if (customAutocompleteActive) {
+          hideAutocomplete();
+        }
+      });
+      
+      // Fechar ao fazer scroll
+      window.addEventListener('scroll', () => {
+        if (customAutocompleteActive) {
+          hideAutocomplete();
+        }
+      });
+      
+      // Limpar debounce quando o textarea perde o foco
+      textarea.addEventListener('blur', () => {
+        // Pequeno delay para permitir clicks no autocomplete
+        setTimeout(() => {
+          if (debounceTimer) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+          }
+          hideAutocomplete();
+        }, 200);
+      });
+    }
+
+    function updateTributeValues() {
+      // Função mantida para compatibilidade - agora não faz nada pois usamos autocomplete customizado
+    }
+
+    // ===== Live Preview e Highlighting =====
+    function updateTemplatePreview() {
+      const template = el('#template').value;
+      const preview = el('#templatePreview');
+      
+      if (!template.trim()) {
+        preview.innerHTML = '<div class="text-muted small text-center p-3">Digite o template acima para ver a prévia aqui</div>';
+        return;
+      }
+
+      // Dados de exemplo para preview
+      const sampleData = getSampleDataForPreview();
+      
+      // Renderizar template com dados de exemplo
+      let rendered = renderTemplateForPreview(template, sampleData);
+      
+      preview.innerHTML = rendered;
+    }
+
+    function getSampleDataForPreview() {
+      const sampleData = {
+        campanha: el('#nomeCampanha').value || 'Minha Empresa'
+      };
+      
+      state.variaveis.forEach(variavel => {
+        switch (variavel.nome) {
+          case 'nome':
+            sampleData[variavel.nome] = 'Ana Souza';
+            break;
+          case 'telefone':
+          case 'whatsapp':
+          case 'celular':
+          case 'phone':
+            sampleData[variavel.nome] = '(11) 9 9999-9999';
+            break;
+          case 'produto':
+            sampleData[variavel.nome] = 'Produto A';
+            break;
+          case 'valor':
+          case 'preco':
+          case 'cashback':
+          case 'dinheiro':
+            sampleData[variavel.nome] = 'R$ 35,50';
+            break;
+          case 'data':
+          case 'data_entrega':
+            sampleData[variavel.nome] = '15/11/2024';
+            break;
+          case 'email':
+            sampleData[variavel.nome] = 'ana@email.com';
+            break;
+          default:
+            // Gerar valor baseado no tipo
+            if (variavel.tipo === 'number') {
+              sampleData[variavel.nome] = '123';
+            } else if (variavel.tipo === 'date') {
+              sampleData[variavel.nome] = '15/11/2024';
+            } else {
+              sampleData[variavel.nome] = variavel.label || variavel.nome;
+            }
+        }
+      });
+      
+      return sampleData;
+    }
+
+    function renderTemplateForPreview(template, data) {
+      // Encontrar todas as variáveis no template
+      const variablePattern = /\{\{([^}]+)\}\}/g;
+      let rendered = template;
+      let usedVariables = new Set();
+      
+      rendered = rendered.replace(variablePattern, (match, varName) => {
+        const cleanVarName = varName.trim();
+        usedVariables.add(cleanVarName);
+        
+        // Verificar se a variável existe
+        const variableExists = state.variaveis.some(v => v.nome === cleanVarName) || cleanVarName === 'campanha';
+        
+        if (variableExists && data[cleanVarName]) {
+          return `<span class="preview-variable">${data[cleanVarName]}</span>`;
+        } else {
+          return `<span class="preview-invalid-variable">{{${cleanVarName}}}</span>`;
+        }
+      });
+      
+      return rendered;
+    }
+
+    function setupTemplateHighlighting() {
+      const templateTextarea = el('#template');
+      if (!templateTextarea) return;
+      
+      // Criar container com overlay para highlighting
+      const container = document.createElement('div');
+      container.className = 'template-input-container';
+      
+      // Criar overlay para highlighting
+      const overlay = document.createElement('div');
+      overlay.className = 'template-highlight-overlay';
+      overlay.id = 'templateHighlightOverlay';
+      
+      // Substituir textarea no DOM
+      templateTextarea.parentNode.insertBefore(container, templateTextarea);
+      container.appendChild(overlay);
+      container.appendChild(templateTextarea);
+      
+      // Função para atualizar highlighting
+      function updateHighlighting() {
+        const text = templateTextarea.value;
+        const highlightedText = highlightVariablesInText(text);
+        overlay.innerHTML = highlightedText;
+        
+        // Sincronizar scroll
+        overlay.scrollTop = templateTextarea.scrollTop;
+        overlay.scrollLeft = templateTextarea.scrollLeft;
+      }
+      
+      // Event listeners para atualizar preview e highlighting
+      templateTextarea.addEventListener('input', () => {
+        updateHighlighting();
+        updateTemplatePreview();
+        // Também salvar automaticamente
+        clearTimeout(window.autoSaveTimeout);
+        window.autoSaveTimeout = setTimeout(salvarDados, 1000);
+      });
+      
+      templateTextarea.addEventListener('scroll', () => {
+        overlay.scrollTop = templateTextarea.scrollTop;
+        overlay.scrollLeft = templateTextarea.scrollLeft;
+      });
+      
+      templateTextarea.addEventListener('keyup', () => {
+        updateHighlighting();
+        updateTemplatePreview();
+      });
+      
+      templateTextarea.addEventListener('paste', () => {
+        setTimeout(() => {
+          updateHighlighting();
+          updateTemplatePreview();
+        }, 10);
+      });
+      
+      // Atualizar highlighting inicial
+      updateHighlighting();
+    }
+
+    function highlightVariablesInText(text) {
+      if (!text) return '';
+      
+      // Escapar HTML primeiro
+      let highlighted = text.replace(/&/g, '&amp;')
+                           .replace(/</g, '&lt;')
+                           .replace(/>/g, '&gt;');
+      
+      // Encontrar e destacar variáveis {{variavel}}
+      const variablePattern = /\{\{([^}]+)\}\}/g;
+      
+      highlighted = highlighted.replace(variablePattern, (match, varName) => {
+        const cleanVarName = varName.trim();
+        
+        // Verificar se a variável existe
+        const variableExists = state.variaveis.some(v => v.nome === cleanVarName) || cleanVarName === 'campanha';
+        
+        if (variableExists) {
+          return `<span class="highlight-variable">${match}</span>`;
+        } else {
+          return `<span class="highlight-invalid">${match}</span>`;
+        }
+      });
+      
+      return highlighted;
     }
 
     // ===== Gerenciamento de Tabela =====
@@ -1508,6 +2358,9 @@ Entre em contato pelo WhatsApp para mais detalhes.`;
       el('#nomeCampanha').value = 'Minha Loja Online';
 
       salvarDados();
+      
+      // Atualizar preview após carregar exemplo
+      setTimeout(updateTemplatePreview, 100);
     }
 
     // ===== Funções Utilitárias =====
@@ -1827,6 +2680,10 @@ Entre em contato pelo WhatsApp para mais detalhes.`;
       renderizarVariaveis();
       renderizarTabela();
       atualizarVariaveisDisponiveis();
+      // Inicializar autocomplete de variáveis
+      initVariableAutocomplete();
+      // Configurar highlighting e preview do template
+      setupTemplateHighlighting();
       setupAutoSave();
       atualizarListaConfiguracoes();
       atualizarListaClientesSalvos();
@@ -1844,6 +2701,8 @@ Entre em contato pelo WhatsApp para mais detalhes.`;
       // Aplicar máscaras de telefone após tudo carregar
       setTimeout(() => {
         aplicarMascarasEmTodosOsTelefones();
+        // Atualizar preview inicial
+        updateTemplatePreview();
       }, 200);
     }
 
